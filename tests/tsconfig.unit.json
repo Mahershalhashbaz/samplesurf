@@ -1,0 +1,18 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "outDir": "../.tmp-unit",
+    "rootDir": "..",
+    "module": "commonjs",
+    "moduleResolution": "node"
+  },
+  "include": [
+    "../lib/amazon.ts",
+    "../lib/amazonTitle.ts",
+    "../lib/nav.ts",
+    "./asin-extract.test.ts",
+    "./amazon-title.test.ts",
+    "./nav-match.test.ts"
+  ]
+}
