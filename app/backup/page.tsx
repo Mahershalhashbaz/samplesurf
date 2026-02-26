@@ -13,11 +13,11 @@ export default function BackupPage({ searchParams }: PageProps) {
   const year = parseTaxYear(firstString(searchParams.year));
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       <section className="app-card">
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
-            <h2 className="text-2xl font-semibold text-ink">Backup & Restore - {year}</h2>
+            <h2 className="text-xl font-semibold text-ink md:text-2xl">Backup & Restore - {year}</h2>
             <p className="text-sm text-slate1">
               Download a full CSV backup or restore from a prior backup dump.
             </p>

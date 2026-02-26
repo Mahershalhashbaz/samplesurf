@@ -57,17 +57,17 @@ export default async function InventoryPage({ searchParams }: PageProps) {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       <section className="app-card">
-        <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
-            <h2 className="text-2xl font-semibold text-ink">Inventory - {selectedYear}</h2>
+            <h2 className="text-xl font-semibold text-ink md:text-2xl">Inventory - {selectedYear}</h2>
             <p className="text-sm text-slate1">Filter, review, and update disposition quickly.</p>
           </div>
           <span className="app-pill">Tax Year {selectedYear}</span>
         </div>
 
-        <form className="mt-5 grid gap-2 md:grid-cols-5" method="GET">
+        <form className="mt-4 grid gap-2 md:mt-5 md:grid-cols-5" method="GET">
           <input defaultValue={String(selectedYear)} name="year" type="hidden" />
           <input defaultValue={firstString(searchParams.receivedYear) ?? ""} name="receivedYear" placeholder="Received year" type="number" />
 
@@ -90,14 +90,14 @@ export default async function InventoryPage({ searchParams }: PageProps) {
               <input defaultChecked={needsAttentionOnly} name="needsAttentionOnly" type="checkbox" value="1" />
               Needs attention only
             </label>
-            <button className="btn-primary" type="submit">
+            <button className="btn-primary ml-auto md:ml-0" type="submit">
               Apply
             </button>
           </div>
         </form>
       </section>
 
-      <section className="app-card overflow-x-auto p-0">
+      <section className="app-card overflow-hidden p-0">
         <InventoryTable rows={rows} />
       </section>
     </div>

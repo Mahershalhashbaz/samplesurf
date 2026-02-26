@@ -120,7 +120,7 @@ td {
 
 @layer components {
   .app-card {
-   @apply rounded-2xl border p-6 shadow-soft;
+   @apply rounded-2xl border p-4 shadow-soft md:p-6;
     background: var(--card);
     border-color: var(--border);
   }

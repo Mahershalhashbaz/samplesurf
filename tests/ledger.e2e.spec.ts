@@ -90,8 +90,7 @@ test("GAVE_AWAY in 2026 creates negative disposition loss and affects loss/net c
 
 test("global year selector persists through URL and localStorage", async ({ page }) => {
   await page.goto("/?year=2025");
-  await page.getByTestId("global-tax-year").fill("2026");
-  await page.getByRole("button", { name: "Apply" }).click();
+  await page.getByTestId("global-tax-year").selectOption("2026");
 
   await expect(page).toHaveURL(/\?year=2026/);
 
@@ -208,4 +207,81 @@ test("csv import skips duplicate ASIN rows by default", async ({ request }) => {
   expect(payload.rejectedRows[0]?.rowNumber).toBe(2);
   expect(payload.rejectedRows[0]?.reason).toBe("Duplicate ASIN");
   expect(payload.rejectedRows[0]?.asin).toBe(existingAsin);
+});
+
+test("scan modal stays scrollable on mobile after lookup fallback expands content", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+
+  await page.route("**/api/scan", async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        ok: true,
+        asins: [],
+        ocrTextSnippet: "LONGHUI HOME Qty Item 1 WhatsBedding Bean Bag Chair Cover",
+        titleCandidate: "WhatsBedding Bean Bag Chair Cover",
+        suggestedTitle: "WhatsBedding Bean Bag Chair Cover",
+        confidence: 93.2,
+      }),
+    });
+  });
+
+  await page.route("**/api/amazon/search**", async (route) => {
+    const results = Array.from({ length: 12 }, (_, index) => ({
+      title: `WhatsBedding Bean Bag Cover Result ${index + 1}`,
+      asin: `B0SCAN${String(index + 1).padStart(4, "0")}`.slice(0, 10),
+      brand: "WhatsBedding",
+      url: `https://www.amazon.com/dp/B0SCAN${String(index + 1).padStart(4, "0")}`.slice(0, 42),
+    }));
+
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ source: "search", results }),
+    });
+  });
+
+  await page.goto("/items/new?year=2026");
+
+  const fileInput = page.locator('input[type="file"][accept="image/*"]');
+  await fileInput.setInputFiles({
+    name: "scan.jpg",
+    mimeType: "image/jpeg",
+    buffer: Buffer.from([0xff, 0xd8, 0xff, 0xd9]),
+  });
+
+  await expect(page.getByText("No ASIN detected. Search Amazon instead?")).toBeVisible();
+  await page.getByRole("button", { name: "Lookup on Amazon" }).click();
+  await expect(
+    page.getByRole("button", {
+      name: /WhatsBedding Bean Bag Cover Result 1\s+B0SCAN0001/i,
+    }),
+  ).toBeVisible();
+  await expect(page.getByRole("button", { name: "Open in Amazon (top match)" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Open search in Amazon" })).toBeVisible();
+  await expect(page.getByText("WhatsBedding Bean Bag Cover Result 6")).not.toBeVisible();
+
+  const scrollArea = page.getByTestId("scan-modal-scroll");
+  const overflowY = await scrollArea.evaluate((element) => window.getComputedStyle(element).overflowY);
+  expect(["auto", "scroll"].includes(overflowY)).toBe(true);
+
+  const scrolled = await scrollArea.evaluate((element) => {
+    element.scrollTop = 1000;
+    return element.scrollTop;
+  });
+  expect(scrolled).toBeGreaterThan(0);
+
+  const footer = page.getByTestId("scan-modal-footer");
+  await expect(footer).toBeVisible();
+  await expect(footer.getByRole("button", { name: "Retake" })).toBeVisible();
+  await expect(footer.getByRole("button", { name: "Use Photo" })).toBeVisible();
+  await expect(footer.getByRole("button", { name: "Cancel" })).toBeVisible();
+
+  const panelMaxHeight = await page
+    .getByTestId("scan-modal-panel")
+    .evaluate((element) => Number.parseFloat(window.getComputedStyle(element).maxHeight));
+  const viewportHeight = page.viewportSize()?.height ?? 844;
+  expect(panelMaxHeight).toBeGreaterThan(0);
+  expect(panelMaxHeight).toBeLessThanOrEqual(Math.ceil(viewportHeight * 0.91));
 });

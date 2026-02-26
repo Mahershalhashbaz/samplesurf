@@ -17,6 +17,17 @@ The app intentionally **does not** include scraping, storefront syncing, browser
 - Route-match-safe sidebar active highlighting (no overlapping highlights)
 - Light/Dark mode toggle (system-default with localStorage persistence)
 
+## SampleSurf V4.0 Highlights
+
+- Mobile-friendly "Scan Slip / Box" capture flow on Add Item
+  - iPhone camera capture via `input[type=file]` with `capture="environment"`
+  - photo preview with confirm/retake/cancel before upload
+  - server OCR pipeline (`sharp` preprocess + `tesseract.js`)
+  - ASIN extraction from OCR text (`B0` + 8 alphanumeric)
+  - single ASIN auto-fills Add Item ASIN and triggers existing Amazon lookup flow
+  - multi-ASIN result picker to choose which ASIN to use
+- No image persistence in V4.0 (image processed in-memory only)
+
 ## Stack
 
 - Next.js (App Router) + TypeScript
@@ -27,6 +38,8 @@ The app intentionally **does not** include scraping, storefront syncing, browser
 - Recharts (dashboard analytics)
 - react-day-picker (calendar date picker UI)
 - @floating-ui/react (portal + collision-aware popovers)
+- sharp (OCR image preprocessing)
+- tesseract.js (OCR)
 - Playwright E2E tests
 
 ## Core Accounting Rules
@@ -102,6 +115,7 @@ Open [http://localhost:3000](http://localhost:3000).
   - Top 10 Items by Receipt Value
 - Add Item fast flow with disposition workflow (`KEPT` / `SOLD` / `GAVE_AWAY`)
 - Add Item Amazon URL field with ASIN autofill + metadata lookup fallback
+- Add Item camera scan flow (Scan Slip / Box) for OCR ASIN detection
 - Inventory list with filters + inline disposition editor
 - Item Details full editor + mark sold + duplicate + delete
 - Needs Attention queue + quick-fix actions
@@ -150,6 +164,7 @@ Included tests:
 - ASIN URL extraction formats (`/dp`, `/gp/product`, slug, `a.co`)
 - Amazon title summarization behavior
 - Nav route matching behavior for exact/prefix rules
+- OCR ASIN extraction and scan API payload behavior
 - sample item in 2025 contributes to gross sample income in 2025
 - same item set to `GAVE_AWAY` in 2026 contributes `-basis` loss in 2026 and affects net
 - global year selector persists via URL and localStorage

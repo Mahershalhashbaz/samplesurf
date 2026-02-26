@@ -88,7 +88,7 @@ export function BackupRestoreTool() {
   return (
     <div className="app-card space-y-4">
       <div>
-        <a className="btn-primary inline-flex items-center gap-1.5" href="/api/export/backup">
+        <a className="btn-primary inline-flex w-full items-center justify-center gap-1.5 sm:w-auto" href="/api/export/backup">
           <Download aria-hidden="true" size={15} />
           Download Backup CSV
         </a>
@@ -105,7 +105,7 @@ export function BackupRestoreTool() {
       {message ? <p className="text-sm text-emerald-700">{message}</p> : null}
 
       <button
-        className="btn-primary inline-flex items-center gap-1.5"
+        className="btn-primary inline-flex w-full items-center justify-center gap-1.5 sm:w-auto"
         disabled={rows.length === 0 || restoring}
         onClick={restore}
         type="button"

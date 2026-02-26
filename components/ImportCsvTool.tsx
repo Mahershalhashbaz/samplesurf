@@ -343,9 +343,9 @@ export function ImportCsvTool() {
             </table>
           </div>
 
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row">
             <button
-              className="btn-primary inline-flex items-center gap-1.5"
+              className="btn-primary inline-flex w-full items-center justify-center gap-1.5 sm:w-auto"
               data-testid="import-valid-rows"
               disabled={importing || missingRequiredMapping || preview.parsed.length === 0}
               onClick={importValidRows}
@@ -356,7 +356,7 @@ export function ImportCsvTool() {
             </button>
 
             <button
-              className="btn-secondary inline-flex items-center gap-1.5"
+              className="btn-secondary inline-flex w-full items-center justify-center gap-1.5 sm:w-auto"
               disabled={combinedRejectedRows.length === 0}
               onClick={downloadRejectedReport}
               type="button"

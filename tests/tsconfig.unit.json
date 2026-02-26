@@ -9,10 +9,16 @@
   },
   "include": [
     "../lib/amazon.ts",
+    "../lib/amazonSearch.ts",
     "../lib/amazonTitle.ts",
+    "../lib/scan-api.ts",
+    "../lib/scan.ts",
     "../lib/nav.ts",
     "./asin-extract.test.ts",
     "./amazon-title.test.ts",
-    "./nav-match.test.ts"
+    "./amazon-search.test.ts",
+    "./nav-match.test.ts",
+    "./scan-asin.test.ts",
+    "./scan-api.test.ts"
   ]
 }

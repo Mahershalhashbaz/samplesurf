@@ -15,7 +15,7 @@ export function KpiCard({ label, value, hint, testId, icon: Icon }: KpiCardProps
         {Icon ? <Icon aria-hidden="true" size={14} /> : null}
         {label}
       </p>
-      <p className="mt-3 text-3xl font-semibold text-ink">{value}</p>
+      <p className="mt-2 text-2xl font-semibold text-ink sm:text-3xl">{value}</p>
       {hint ? <p className="mt-2 text-xs text-slate1">{hint}</p> : null}
     </div>
   );
