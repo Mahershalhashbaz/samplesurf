@@ -12,3 +12,9 @@ prisma/dev.db-journal
 prisma/test.db
 prisma/test.db-journal
 .tmp-unit
+
+# Local databases
+prisma/*.db
+prisma/*.db-journal
+prisma/*.db-wal
+prisma/*.db-shm
