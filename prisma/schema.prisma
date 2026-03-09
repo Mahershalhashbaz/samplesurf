@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -13,6 +13,10 @@ model Item {
   title             String
   acquisitionType   String   @default("SAMPLE")
   dispositionType   String   @default("KEPT")
+  videoDone         Boolean  @default(true)
+  videoDoneAt       DateTime?
+  videoSlaDays      Int      @default(14)
+  videoNotes        String?
   receivedDate      DateTime
   receiptValueCents Int
   currency          String   @default("USD")
