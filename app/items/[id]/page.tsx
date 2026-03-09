@@ -57,6 +57,10 @@ export default async function ItemDetailsPage({ params }: PageProps) {
           soldDate: toDateInputValue(item.soldDate) || null,
           saleProceedsCents: item.saleProceedsCents,
           notes: item.notes,
+          videoDone: item.videoDone,
+          videoDoneAt: toDateInputValue(item.videoDoneAt) || null,
+          videoSlaDays: item.videoSlaDays,
+          videoNotes: item.videoNotes,
         }}
       />
     </div>

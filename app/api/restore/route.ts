@@ -42,6 +42,10 @@ export async function POST(request: Request) {
     soldDate: Date | null;
     saleProceedsCents: number | null;
     notes: string | null;
+    videoDone: boolean;
+    videoDoneAt: Date | null;
+    videoSlaDays: number;
+    videoNotes: string | null;
   }>;
 
   for (const [index, row] of body.rows.entries()) {
@@ -103,6 +107,10 @@ export async function POST(request: Request) {
             ? null
             : saleProceedsCents,
       notes: parsed.data.notes || null,
+      videoDone: true,
+      videoDoneAt: receivedDate,
+      videoSlaDays: 14,
+      videoNotes: null,
     });
   }
 
@@ -117,6 +125,7 @@ export async function POST(request: Request) {
   revalidatePath("/items");
   revalidatePath("/needs-attention");
   revalidatePath("/tax-year");
+  revalidatePath("/video-tracker");
 
   return jsonResponse({ restoredCount: normalizedRows.length });
 }

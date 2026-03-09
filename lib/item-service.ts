@@ -52,6 +52,10 @@ function parseRequiredDate(dateInput: string): Date {
 export function toItemDbInput(input: ItemPayload): Prisma.ItemUncheckedCreateInput {
   const receivedDate = parseRequiredDate(input.receivedDate);
   const soldDate = parseDateOnly(input.soldDate ?? undefined);
+  const videoDone = input.videoDone ?? true;
+  const videoDoneAt = videoDone
+    ? parseDateOnly(input.videoDoneAt ?? undefined) ?? new Date()
+    : null;
 
   return {
     asin: input.asin,
@@ -69,6 +73,10 @@ export function toItemDbInput(input: ItemPayload): Prisma.ItemUncheckedCreateInp
           ? null
           : input.saleProceedsCents,
     notes: input.notes,
+    videoDone,
+    videoDoneAt,
+    videoSlaDays: input.videoSlaDays ?? 14,
+    videoNotes: input.videoNotes,
   };
 }
 
@@ -111,6 +119,24 @@ export function toItemDbPatchInput(input: ItemPatchPayload): Prisma.ItemUnchecke
   }
   if (input.notes !== undefined) {
     dbInput.notes = input.notes && input.notes.trim().length > 0 ? input.notes.trim() : null;
+  }
+  if (input.videoDone !== undefined) {
+    dbInput.videoDone = input.videoDone;
+    if (input.videoDone === false) {
+      dbInput.videoDoneAt = null;
+    }
+  }
+  if (input.videoDoneAt !== undefined) {
+    dbInput.videoDoneAt = parseDateOnly(input.videoDoneAt ?? undefined);
+  }
+  if (input.videoSlaDays !== undefined) {
+    dbInput.videoSlaDays = input.videoSlaDays;
+  }
+  if (input.videoNotes !== undefined) {
+    dbInput.videoNotes =
+      input.videoNotes && input.videoNotes.trim().length > 0
+        ? input.videoNotes.trim()
+        : null;
   }
 
   return dbInput;

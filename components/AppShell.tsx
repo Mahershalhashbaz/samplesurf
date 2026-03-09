@@ -4,6 +4,7 @@ import type { LucideIcon } from "lucide-react";
 import {
   AlertTriangle,
   Box,
+  Clapperboard,
   DatabaseBackup,
   FileUp,
   LayoutDashboard,
@@ -33,6 +34,7 @@ const navItems: Array<{
   { href: "/", label: "Dashboard", icon: LayoutDashboard, matchMode: "exact" },
   { href: "/items/new", label: "Add Item", icon: PlusCircle, matchMode: "exact" },
   { href: "/items", label: "Inventory", icon: Box, matchMode: "exact" },
+  { href: "/video-tracker", label: "Video Tracker", icon: Clapperboard, matchMode: "exact" },
   { href: "/tax-year", label: "Tax Year", icon: ReceiptText, matchMode: "exact" },
   { href: "/needs-attention", label: "Needs Attention", icon: AlertTriangle, matchMode: "exact" },
   { href: "/import", label: "Import", icon: FileUp, matchMode: "exact" },
@@ -202,10 +204,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <Link className="flex min-w-0 items-center gap-2" href={hrefWithYear("/", activeYear)}>
               <Image
                 alt="SampleSurf logo"
-                className="h-10 w-10 object-contain"
+                className="h-10 w-10 rounded-xl object-cover"
                 height={40}
                 priority
-                src="/samplesurf-logo.png"
+                src="/samplesurf-logo-rounded.png"
                 width={40}
               />
               <div className="min-w-0">
@@ -249,10 +251,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <Link className="flex items-center gap-4" href={hrefWithYear("/", activeYear)}>
             <Image
               alt="SampleSurf logo"
-              className="h-[56px] w-[56px] object-contain"
+              className="h-[56px] w-[56px] rounded-xl object-cover"
               height={56}
               priority
-              src="/samplesurf-logo.png"
+              src="/samplesurf-logo-rounded.png"
               width={56}
             />
             <div>
@@ -308,9 +310,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <div className="flex items-center gap-2">
               <Image
                 alt="SampleSurf logo"
-                className="h-8 w-8 object-contain"
+                className="h-8 w-8 rounded-xl object-cover"
                 height={32}
-                src="/samplesurf-logo.png"
+                src="/samplesurf-logo-rounded.png"
                 width={32}
               />
               <p className="text-base font-semibold text-[color:var(--sidebar-fg)]">SampleSurf</p>
@@ -359,9 +361,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <div className="sidebar-panel mb-4 flex items-center gap-2 rounded-xl px-3 py-2">
             <Image
               alt="SampleSurf logo"
-              className="h-8 w-8 object-contain"
+              className="h-8 w-8 rounded-xl object-cover"
               height={32}
-              src="/samplesurf-logo.png"
+              src="/samplesurf-logo-rounded.png"
               width={32}
             />
             <p className="text-base font-semibold text-[color:var(--sidebar-fg)]">SampleSurf</p>

@@ -251,3 +251,54 @@ export async function getNeedsAttentionItems() {
     .map((item) => ({ item, reasons: getNeedsAttentionReasons(item) }))
     .filter((entry) => entry.reasons.length > 0);
 }
+
+export type VideoTrackerItem = {
+  id: string;
+  asin: string;
+  title: string;
+  receivedDate: Date;
+  videoDone: boolean;
+  videoDoneAt: Date | null;
+  videoSlaDays: number;
+  videoNotes: string | null;
+  createdAt: Date;
+};
+
+export async function getVideoTrackerData() {
+  const items = await db.item.findMany({
+    select: {
+      id: true,
+      asin: true,
+      title: true,
+      receivedDate: true,
+      videoDone: true,
+      videoDoneAt: true,
+      videoSlaDays: true,
+      videoNotes: true,
+      createdAt: true,
+    },
+  });
+
+  const needsVideo = items
+    .filter((item) => item.videoDone === false)
+    .sort((a, b) => {
+      const receivedCompare = a.receivedDate.getTime() - b.receivedDate.getTime();
+      if (receivedCompare !== 0) {
+        return receivedCompare;
+      }
+      return a.createdAt.getTime() - b.createdAt.getTime();
+    });
+
+  const completed = items
+    .filter((item) => item.videoDone === true)
+    .sort((a, b) => {
+      const doneA = a.videoDoneAt?.getTime() ?? 0;
+      const doneB = b.videoDoneAt?.getTime() ?? 0;
+      if (doneA !== doneB) {
+        return doneB - doneA;
+      }
+      return b.receivedDate.getTime() - a.receivedDate.getTime();
+    });
+
+  return { needsVideo, completed };
+}

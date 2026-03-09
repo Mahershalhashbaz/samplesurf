@@ -10,6 +10,7 @@ function revalidateCommonPaths(id: string) {
   revalidatePath(`/items/${id}`);
   revalidatePath("/needs-attention");
   revalidatePath("/tax-year");
+  revalidatePath("/video-tracker");
 }
 
 type Params = {
@@ -25,7 +26,10 @@ export async function GET(_request: NextRequest, { params }: Params) {
 }
 
 export async function PATCH(request: NextRequest, { params }: Params) {
-  const existing = await db.item.findUnique({ where: { id: params.id }, select: { id: true } });
+  const existing = await db.item.findUnique({
+    where: { id: params.id },
+    select: { id: true, videoDone: true },
+  });
   if (!existing) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
@@ -50,6 +54,10 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       { error: err instanceof Error ? err.message : "Invalid payload" },
       { status: 400 },
     );
+  }
+
+  if (data.videoDone !== undefined && data.videoDone !== existing.videoDone) {
+    dbInput.videoDoneAt = data.videoDone ? new Date() : null;
   }
 
   const item = await db.item.update({

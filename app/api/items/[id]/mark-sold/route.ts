@@ -31,6 +31,7 @@ export async function POST(_request: Request, { params }: Params) {
   revalidatePath(`/items/${params.id}`);
   revalidatePath("/needs-attention");
   revalidatePath("/tax-year");
+  revalidatePath("/video-tracker");
 
   return NextResponse.json({ item });
 }

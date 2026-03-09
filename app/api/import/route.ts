@@ -40,6 +40,10 @@ export async function POST(request: Request) {
     soldDate: Date | null;
     saleProceedsCents: number | null;
     notes: string | null;
+    videoDone: boolean;
+    videoDoneAt: Date | null;
+    videoSlaDays: number;
+    videoNotes: string | null;
   }>;
 
   const allowDuplicates = body.allowDuplicates === true;
@@ -81,6 +85,10 @@ export async function POST(request: Request) {
             ? null
             : parsed.data.saleProceedsCents ?? null,
       notes: parsed.data.notes ?? null,
+      videoDone: true,
+      videoDoneAt: receivedDate,
+      videoSlaDays: 14,
+      videoNotes: null,
     });
   }
 
@@ -132,6 +140,7 @@ export async function POST(request: Request) {
   revalidatePath("/items");
   revalidatePath("/needs-attention");
   revalidatePath("/tax-year");
+  revalidatePath("/video-tracker");
 
   return jsonResponse({ importedCount: createdIds.length, rejectedRows });
 }

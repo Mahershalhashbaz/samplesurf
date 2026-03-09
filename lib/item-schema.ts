@@ -29,6 +29,10 @@ export const itemPayloadSchema = z
     soldDate: baseDateStringSchema,
     saleProceedsCents: z.number().int().min(0).nullable().optional(),
     notes: baseNotesSchema,
+    videoDone: z.boolean().optional().default(true),
+    videoDoneAt: baseDateStringSchema,
+    videoSlaDays: z.number().int().min(1).optional().default(14),
+    videoNotes: baseNotesSchema,
   })
   .superRefine((input, ctx) => {
     if ((input.dispositionType === "SOLD" || input.dispositionType === "GAVE_AWAY") && !input.soldDate) {
@@ -55,6 +59,10 @@ export const itemPayloadSchema = z
         soldDate: null,
         saleProceedsCents: null,
         notes: input.notes,
+        videoDone: input.videoDone,
+        videoDoneAt: input.videoDoneAt,
+        videoSlaDays: input.videoSlaDays,
+        videoNotes: input.videoNotes,
       };
     }
 
@@ -64,6 +72,10 @@ export const itemPayloadSchema = z
         currency: input.currency || "USD",
         saleProceedsCents: 0,
         notes: input.notes,
+        videoDone: input.videoDone,
+        videoDoneAt: input.videoDoneAt,
+        videoSlaDays: input.videoSlaDays,
+        videoNotes: input.videoNotes,
       };
     }
 
@@ -72,6 +84,10 @@ export const itemPayloadSchema = z
       currency: input.currency || "USD",
       saleProceedsCents: input.saleProceedsCents ?? null,
       notes: input.notes,
+      videoDone: input.videoDone,
+      videoDoneAt: input.videoDoneAt,
+      videoSlaDays: input.videoSlaDays,
+      videoNotes: input.videoNotes,
     };
   });
 
@@ -86,6 +102,10 @@ export const itemPatchSchema = z.object({
   soldDate: z.string().optional().nullable(),
   saleProceedsCents: z.number().int().min(0).optional().nullable(),
   notes: z.string().optional().nullable(),
+  videoDone: z.boolean().optional(),
+  videoDoneAt: z.string().optional().nullable(),
+  videoSlaDays: z.number().int().min(1).optional(),
+  videoNotes: z.string().optional().nullable(),
   confirmDuplicate: z.boolean().optional(),
 });
 

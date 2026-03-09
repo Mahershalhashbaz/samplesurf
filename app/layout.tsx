@@ -8,9 +8,9 @@ export const metadata: Metadata = {
   title: "SampleSurf",
   description: "Local tracker for Amazon Influencer samples and purchases",
   icons: {
-    icon: "/samplesurf-logo.png",
-    shortcut: "/samplesurf-logo.png",
-    apple: "/samplesurf-logo.png",
+    icon: "/app-icon-1024.png",
+    shortcut: "/app-icon-1024.png",
+    apple: "/app-icon-1024.png",
   },
 };
 

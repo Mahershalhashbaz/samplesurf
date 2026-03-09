@@ -20,6 +20,7 @@ function revalidateCommonPaths() {
   revalidatePath("/items");
   revalidatePath("/needs-attention");
   revalidatePath("/tax-year");
+  revalidatePath("/video-tracker");
 }
 
 export async function GET(request: NextRequest) {

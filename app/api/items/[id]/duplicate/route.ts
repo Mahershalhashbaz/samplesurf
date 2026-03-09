@@ -24,6 +24,10 @@ export async function POST(_request: Request, { params }: Params) {
       title: original.title,
       acquisitionType: original.acquisitionType,
       dispositionType: "KEPT",
+      videoDone: original.videoDone,
+      videoDoneAt: original.videoDoneAt,
+      videoSlaDays: original.videoSlaDays,
+      videoNotes: original.videoNotes,
       receivedDate: todayUtcDateOnly(),
       receiptValueCents: original.receiptValueCents,
       currency: original.currency,
@@ -37,6 +41,7 @@ export async function POST(_request: Request, { params }: Params) {
   revalidatePath("/items");
   revalidatePath("/needs-attention");
   revalidatePath("/tax-year");
+  revalidatePath("/video-tracker");
 
   return NextResponse.json({ item: duplicate }, { status: 201 });
 }

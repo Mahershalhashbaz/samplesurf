@@ -285,3 +285,39 @@ test("scan modal stays scrollable on mobile after lookup fallback expands conten
   expect(panelMaxHeight).toBeGreaterThan(0);
   expect(panelMaxHeight).toBeLessThanOrEqual(Math.ceil(viewportHeight * 0.91));
 });
+
+test("video tracker marks item done and moves it to completed", async ({ page, request }) => {
+  const asin = uniqueAsin("VIDE");
+
+  const created = await request.post("/api/items", {
+    data: {
+      ...baseCreatePayload(asin, "2026-01-01"),
+      title: "Video Tracker Flow Test",
+      videoDone: false,
+      videoSlaDays: 14,
+      videoNotes: "Needs filming",
+    },
+  });
+  expect(created.status()).toBe(201);
+
+  await page.goto("/video-tracker?year=2026");
+
+  const needsRow = page.getByTestId(`video-needs-${asin}`);
+  await expect(needsRow).toBeVisible();
+  await expect(needsRow).toContainText("Needs filming");
+
+  await needsRow.getByRole("button", { name: "Mark Done" }).click();
+
+  await expect(page.getByTestId(`video-needs-${asin}`)).not.toBeVisible();
+  await expect(page.getByTestId(`video-done-${asin}`)).toBeVisible();
+});
+
+test("dashboard mobile quick add FAB opens add item page", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/?year=2026");
+
+  const fab = page.getByLabel("Quick add item");
+  await expect(fab).toBeVisible();
+  await fab.click();
+  await expect(page).toHaveURL(/\/items\/new\?year=2026/);
+});

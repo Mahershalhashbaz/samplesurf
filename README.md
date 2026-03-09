@@ -28,6 +28,19 @@ The app intentionally **does not** include scraping, storefront syncing, browser
   - multi-ASIN result picker to choose which ASIN to use
 - No image persistence in V4.0 (image processed in-memory only)
 
+## SampleSurf V4.2 Highlights
+
+- Video Tracker workflow (`/video-tracker`)
+  - binary video status (`videoDone`)
+  - quick Mark Done / Mark Not Done actions
+  - oldest-first Needs Video queue with SLA days and days-open highlights
+  - completed queue sorted by most recent completion
+  - per-item video notes + SLA settings
+- Mobile Dashboard Quick Add floating button (`+`) to jump to Add Item
+- Icon split:
+  - install/home-screen icon uses full-bleed square asset (`/public/app-icon-1024.png`)
+  - in-app header/sidebar logo uses rounded asset (`/public/samplesurf-logo-rounded.png`)
+
 ## Stack
 
 - Next.js (App Router) + TypeScript
@@ -118,7 +131,9 @@ Open [http://localhost:3000](http://localhost:3000).
 - Add Item camera scan flow (Scan Slip / Box) for OCR ASIN detection
 - Inventory list with filters + inline disposition editor
 - Item Details full editor + mark sold + duplicate + delete
+- Item Details video settings (`videoDone`, `videoSlaDays`, `videoNotes`)
 - Needs Attention queue + quick-fix actions
+- Video Tracker queue for filming workflow
 - Tax Year view with independent Section A and Section B
 - CSV export
   - sample income lines

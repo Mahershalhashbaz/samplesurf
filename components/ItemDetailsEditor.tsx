@@ -2,6 +2,7 @@
 
 import {
   CalendarDays,
+  Clapperboard,
   Copy,
   DollarSign,
   PackageCheck,
@@ -30,6 +31,10 @@ type ItemDetailsEditorProps = {
     soldDate: string | null;
     saleProceedsCents: number | null;
     notes: string | null;
+    videoDone: boolean;
+    videoDoneAt: string | null;
+    videoSlaDays: number;
+    videoNotes: string | null;
   };
 };
 
@@ -43,6 +48,9 @@ type FormState = {
   soldDate: string;
   saleProceeds: string;
   notes: string;
+  videoDone: boolean;
+  videoSlaDays: string;
+  videoNotes: string;
 };
 
 export function ItemDetailsEditor({ item }: ItemDetailsEditorProps) {
@@ -57,6 +65,9 @@ export function ItemDetailsEditor({ item }: ItemDetailsEditorProps) {
     soldDate: item.soldDate ?? "",
     saleProceeds: centsToDecimalString(item.saleProceedsCents),
     notes: item.notes ?? "",
+    videoDone: item.videoDone,
+    videoSlaDays: String(item.videoSlaDays),
+    videoNotes: item.videoNotes ?? "",
   });
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -87,6 +98,11 @@ export function ItemDetailsEditor({ item }: ItemDetailsEditorProps) {
     });
   }, [form.dispositionType, form.receiptValue, form.saleProceeds, form.soldDate]);
 
+  const videoCompletedDateLabel =
+    form.videoDone
+      ? item.videoDoneAt ?? "Will set on save"
+      : "-";
+
   async function save() {
     setSaving(true);
     setError(null);
@@ -95,6 +111,12 @@ export function ItemDetailsEditor({ item }: ItemDetailsEditorProps) {
     const receiptValueCents = parseMoneyToCents(form.receiptValue);
     if (receiptValueCents === null || receiptValueCents < 0) {
       setError("Receipt value is invalid");
+      setSaving(false);
+      return;
+    }
+    const videoSlaDays = Number.parseInt(form.videoSlaDays, 10);
+    if (!Number.isFinite(videoSlaDays) || videoSlaDays < 1) {
+      setError("Video SLA days must be at least 1");
       setSaving(false);
       return;
     }
@@ -141,6 +163,9 @@ export function ItemDetailsEditor({ item }: ItemDetailsEditorProps) {
         soldDate,
         saleProceedsCents,
         notes: form.notes || null,
+        videoDone: form.videoDone,
+        videoSlaDays,
+        videoNotes: form.videoNotes || null,
       }),
     });
 
@@ -291,9 +316,54 @@ export function ItemDetailsEditor({ item }: ItemDetailsEditorProps) {
 
         <div className="md:col-span-2">
           <label className="mb-1 block text-sm font-medium" htmlFor="detail-notes">
-            Notes
+            Item Notes
           </label>
           <textarea className="min-h-24 w-full" id="detail-notes" onChange={(e) => update("notes", e.target.value)} value={form.notes} />
+        </div>
+
+        <div className="rounded-xl border border-[color:var(--border)] bg-ice/45 p-4 md:col-span-2">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <label className="inline-flex items-center gap-2 text-sm font-medium text-ink" htmlFor="detail-video-done">
+              <input
+                checked={form.videoDone}
+                id="detail-video-done"
+                onChange={(event) => update("videoDone", event.target.checked)}
+                type="checkbox"
+              />
+              Video completed
+            </label>
+            <p className="text-xs text-slate1">
+              Completed date: {videoCompletedDateLabel}
+            </p>
+          </div>
+
+          <div className="mt-3 grid gap-3 md:grid-cols-2">
+            <div>
+              <label className="mb-1 flex items-center gap-1.5 text-sm font-medium" htmlFor="detail-video-sla-days">
+                <Clapperboard aria-hidden="true" size={14} />
+                Video SLA (days)
+              </label>
+              <input
+                id="detail-video-sla-days"
+                min="1"
+                onChange={(event) => update("videoSlaDays", event.target.value)}
+                type="number"
+                value={form.videoSlaDays}
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium" htmlFor="detail-video-notes">
+                Video Notes
+              </label>
+              <textarea
+                className="min-h-20 w-full"
+                id="detail-video-notes"
+                onChange={(event) => update("videoNotes", event.target.value)}
+                placeholder="Filming/posting notes"
+                value={form.videoNotes}
+              />
+            </div>
+          </div>
         </div>
       </div>
 
