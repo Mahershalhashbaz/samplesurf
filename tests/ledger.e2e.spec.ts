@@ -30,8 +30,20 @@ function parseCurrencyValue(text: string): number {
 }
 
 async function readCardCurrencyValue(page: Page, testId: string): Promise<number> {
-  const text = (await page.getByTestId(testId).innerText()).trim();
-  return parseCurrencyValue(text);
+  const card = page.getByTestId(testId);
+  let previous = Number.NaN;
+
+  for (let attempt = 0; attempt < 12; attempt += 1) {
+    const text = (await card.innerText()).trim();
+    const value = parseCurrencyValue(text);
+    if (Object.is(previous, value)) {
+      return value;
+    }
+    previous = value;
+    await page.waitForTimeout(130);
+  }
+
+  return previous;
 }
 
 test("sample received in 2025 is recognized as 2025 gross sample income", async ({ page }) => {
@@ -46,7 +58,7 @@ test("sample received in 2025 is recognized as 2025 gross sample income", async 
   await page.getByTestId("add-receipt-value").fill("100.00");
   await page.getByTestId("add-save").click();
 
-  await expect(page.getByText("Item saved.")).toBeVisible();
+  await expect(page.getByText("Item Added")).toBeVisible();
 
   await page.goto("/tax-year?year=2025");
   await expect(page.getByTestId(`tax-a-row-${asin}`)).toBeVisible();
@@ -67,8 +79,16 @@ test("GAVE_AWAY in 2026 creates negative disposition loss and affects loss/net c
   await page.getByTestId("add-received-date").fill("2025-06-15");
   await page.getByTestId("add-receipt-value").fill("120.00");
   await page.getByTestId("add-save").click();
+  await expect(page.getByText("Item Added")).toBeVisible();
 
-  await page.getByRole("link", { name: "Open Item Details" }).click();
+  const createdLookup = await page.request.get(`/api/items?asin=${asin}`);
+  expect(createdLookup.ok()).toBeTruthy();
+  const createdPayload = (await createdLookup.json()) as {
+    existingItem: { id: string } | null;
+  };
+  expect(createdPayload.existingItem?.id).toBeTruthy();
+
+  await page.goto(`/items/${createdPayload.existingItem?.id}?year=2026`);
   await page.getByLabel("Disposition Type").selectOption("GAVE_AWAY");
   await page.getByLabel("Disposed Date").fill("2026-02-01");
   await page.getByRole("button", { name: /^Save$/ }).click();
@@ -151,7 +171,7 @@ test("add item UI warns on duplicate ASIN and blocks save until Add anyway", asy
   await expect(page.getByTestId("add-save")).toBeEnabled();
 
   await page.getByTestId("add-save").click();
-  await expect(page.getByText("Item saved.")).toBeVisible();
+  await expect(page.getByText("Item Added")).toBeVisible();
 });
 
 test("csv import skips duplicate ASIN rows by default", async ({ request }) => {

@@ -4,6 +4,7 @@ import {
   AlertTriangle,
   Camera,
   CalendarDays,
+  CheckCircle2,
   DollarSign,
   Eye,
   ExternalLink,
@@ -11,7 +12,6 @@ import {
   Loader2,
   Link2,
   PackageCheck,
-  PlusCircle,
   Save,
   Search,
   Tag,
@@ -25,10 +25,6 @@ import { DatePicker } from "@/components/DatePicker";
 import { extractAsinFromAmazonUrl } from "@/lib/amazon";
 import { todayDateInput } from "@/lib/dates";
 import { parseMoneyToCents } from "@/lib/money";
-
-type SaveResult = {
-  id: string;
-};
 
 type LookupState = "idle" | "loading" | "done" | "failed";
 
@@ -94,18 +90,20 @@ type FormState = {
   notes: string;
 };
 
-const initialState: FormState = {
-  amazonUrl: "",
-  asin: "",
-  title: "",
-  acquisitionType: "SAMPLE",
-  dispositionType: "KEPT",
-  receivedDate: todayDateInput(),
-  receiptValue: "",
-  soldDate: "",
-  saleProceeds: "",
-  notes: "",
-};
+function createInitialState(): FormState {
+  return {
+    amazonUrl: "",
+    asin: "",
+    title: "",
+    acquisitionType: "SAMPLE",
+    dispositionType: "KEPT",
+    receivedDate: todayDateInput(),
+    receiptValue: "",
+    soldDate: "",
+    saleProceeds: "",
+    notes: "",
+  };
+}
 
 function looksLikeAmazonUrl(raw: string): boolean {
   const trimmed = raw.trim();
@@ -153,10 +151,10 @@ function buildAmazonSearchUrl(raw: string): string | null {
 }
 
 export function AddItemForm() {
-  const [form, setForm] = useState<FormState>(initialState);
+  const [form, setForm] = useState<FormState>(createInitialState());
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [saved, setSaved] = useState<SaveResult | null>(null);
+  const [showSuccessOverlay, setShowSuccessOverlay] = useState(false);
   const [lookupState, setLookupState] = useState<LookupState>("idle");
   const [autofilledFromAmazon, setAutofilledFromAmazon] = useState(false);
   const [lastLookupUrl, setLastLookupUrl] = useState("");
@@ -180,6 +178,7 @@ export function AddItemForm() {
   const scanInputRef = useRef<HTMLInputElement | null>(null);
   const asinInputRef = useRef<HTMLInputElement | null>(null);
   const titleRef = useRef(form.title);
+  const successTimeoutRef = useRef<number | null>(null);
 
   function update<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -318,6 +317,13 @@ export function AddItemForm() {
     setLastLookupUrl("");
   }
 
+  function clearSuccessTimer() {
+    if (successTimeoutRef.current !== null) {
+      window.clearTimeout(successTimeoutRef.current);
+      successTimeoutRef.current = null;
+    }
+  }
+
   useEffect(() => {
     return () => {
       if (scanPreviewUrl) {
@@ -343,6 +349,31 @@ export function AddItemForm() {
     if (scanInputRef.current) {
       scanInputRef.current.value = "";
     }
+  }
+
+  function resetAddItemState() {
+    lookupRequestId.current += 1;
+    duplicateRequestId.current += 1;
+    scanRequestId.current += 1;
+
+    setForm(createInitialState());
+    setError(null);
+    setLookupState("idle");
+    setAutofilledFromAmazon(false);
+    setLastLookupUrl("");
+    setDuplicateMatch(null);
+    setCheckingDuplicate(false);
+    setAllowDuplicateAsin(null);
+    setScanOpen(false);
+    setScanUploading(false);
+    setScanResult(null);
+    setScanError(null);
+    setScanSearchError(null);
+    setScanSearchResults([]);
+    setScanSearchQuery("");
+    setScanSearchingAmazon(false);
+    setScanSuccess(null);
+    clearScanPreview();
   }
 
   function closeScanModal() {
@@ -579,12 +610,18 @@ export function AddItemForm() {
 
     setSaving(true);
     setError(null);
-    setSaved(null);
+    clearSuccessTimer();
+    setShowSuccessOverlay(false);
 
     try {
       const result = await submit(allowDuplicateAsin === normalizedAsin);
-      if (result.ok && result.id) {
-        setSaved({ id: result.id });
+      if (result.ok) {
+        setShowSuccessOverlay(true);
+        successTimeoutRef.current = window.setTimeout(() => {
+          setShowSuccessOverlay(false);
+          resetAddItemState();
+          successTimeoutRef.current = null;
+        }, 1700);
       }
     } catch {
       setError("Unexpected error while creating item");
@@ -593,25 +630,11 @@ export function AddItemForm() {
     }
   }
 
-  function onAddAnother() {
-    setSaved(null);
-    setError(null);
-    setLookupState("idle");
-    setAutofilledFromAmazon(false);
-    setLastLookupUrl("");
-    setDuplicateMatch(null);
-    setAllowDuplicateAsin(null);
-    setScanSuccess(null);
-    setScanSearchError(null);
-    setScanSearchResults([]);
-    setScanSearchQuery("");
-    setForm({
-      ...initialState,
-      acquisitionType: form.acquisitionType,
-      receivedDate: form.receivedDate,
-      dispositionType: form.dispositionType,
-    });
-  }
+  useEffect(() => {
+    return () => {
+      clearSuccessTimer();
+    };
+  }, []);
 
   const duplicateBlocked = Boolean(duplicateMatch && allowDuplicateAsin !== normalizedAsin);
   const trimmedScanSearchQuery = scanSearchQuery.trim();
@@ -684,13 +707,17 @@ export function AddItemForm() {
             <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
               {lookupState === "loading" ? <span className="text-slate1">Fetching details...</span> : null}
               {autofilledFromAmazon ? (
-                <span className="rounded-full bg-emerald-100 px-2.5 py-1 font-medium text-emerald-800">
+                <span className="notice-anim rounded-full bg-emerald-100 px-2.5 py-1 font-medium text-emerald-800">
                   Auto-filled from Amazon
                 </span>
               ) : null}
-              {scanSuccess ? <span className="rounded-full bg-sky-100 px-2.5 py-1 font-medium text-sky-800">{scanSuccess}</span> : null}
+              {scanSuccess ? (
+                <span className="notice-anim rounded-full bg-sky-100 px-2.5 py-1 font-medium text-sky-800">
+                  {scanSuccess}
+                </span>
+              ) : null}
               {lookupState === "failed" ? (
-                <span className="text-amber-700">Couldn&apos;t fetch details - you can fill manually.</span>
+                <span className="notice-anim text-amber-700">Couldn&apos;t fetch details - you can fill manually.</span>
               ) : null}
             </div>
           </div>
@@ -840,7 +867,7 @@ export function AddItemForm() {
         </div>
 
         {duplicateMatch ? (
-          <div className="rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900" data-testid="duplicate-warning-banner">
+          <div className="notice-anim rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900" data-testid="duplicate-warning-banner">
             <p className="inline-flex items-center gap-1.5 font-semibold">
               <AlertTriangle aria-hidden="true" size={15} />
               Oops - looks like you already added this item.
@@ -867,31 +894,12 @@ export function AddItemForm() {
           </div>
         ) : null}
 
-        {error ? <p className="text-sm text-red-700">{error}</p> : null}
-
-        {saved ? (
-          <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
-            <p>Item saved.</p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              <button className="btn-primary inline-flex items-center gap-1.5" onClick={onAddAnother} type="button">
-                <PlusCircle aria-hidden="true" size={15} />
-                Add Another
-              </button>
-              <Link className="btn-secondary inline-flex items-center gap-1.5" href={`/items/${saved.id}`}>
-                <ExternalLink aria-hidden="true" size={15} />
-                Open Item Details
-              </Link>
-              <Link className="btn-secondary" href="/items">
-                Go to Inventory
-              </Link>
-            </div>
-          </div>
-        ) : null}
+        {error ? <p className="notice-anim text-sm text-red-700">{error}</p> : null}
 
         <button
           className="btn-primary inline-flex items-center gap-1.5"
           data-testid="add-save"
-          disabled={saving || duplicateBlocked}
+          disabled={saving || duplicateBlocked || showSuccessOverlay}
           type="submit"
         >
           <Save aria-hidden="true" size={15} />
@@ -945,7 +953,7 @@ export function AddItemForm() {
                   </div>
                 ) : null}
 
-                {scanError ? <p className="mt-4 text-sm text-red-700">{scanError}</p> : null}
+                {scanError ? <p className="notice-anim mt-4 text-sm text-red-700">{scanError}</p> : null}
 
                 {scanResult && scanResult.asins.length > 1 ? (
                   <div className="mt-4 rounded-xl border border-[color:var(--border)] bg-ice/70 p-3">
@@ -1034,7 +1042,7 @@ export function AddItemForm() {
                       </button>
                     </div>
 
-                    {scanSearchError ? <p className="mt-2 text-xs text-red-700">{scanSearchError}</p> : null}
+                    {scanSearchError ? <p className="notice-anim mt-2 text-xs text-red-700">{scanSearchError}</p> : null}
 
                     {topSearchResults.length > 0 ? (
                       <div className="mt-3 space-y-2">
@@ -1121,6 +1129,18 @@ export function AddItemForm() {
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      ) : null}
+
+      {showSuccessOverlay ? (
+        <div className="fixed inset-0 z-[10030] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-slate-950/25 backdrop-blur-sm" />
+          <div className="success-overlay-card relative flex min-h-[168px] w-full max-w-xs flex-col items-center justify-center gap-4 rounded-2xl border border-white/60 bg-white/92 text-center shadow-2xl dark:border-white/20 dark:bg-slate-900/88">
+            <div className="success-check-wrap">
+              <CheckCircle2 aria-hidden="true" className="success-check-icon" size={52} />
+            </div>
+            <p className="text-lg font-semibold text-ink">Item Added</p>
           </div>
         </div>
       ) : null}

@@ -132,7 +132,7 @@ export function VideoTrackerBoard({ rows: initialRows }: VideoTrackerBoardProps)
 
   return (
     <div className="space-y-4 md:space-y-6">
-      {error ? <p className="text-sm text-red-700">{error}</p> : null}
+      {error ? <p className="notice-anim text-sm text-red-700">{error}</p> : null}
 
       <section className="app-card">
         <div className="mb-3 flex items-center justify-between gap-2">
@@ -155,7 +155,7 @@ export function VideoTrackerBoard({ rows: initialRows }: VideoTrackerBoardProps)
 
             return (
               <article
-                className="rounded-xl border border-[color:var(--border)] bg-[color:var(--card)] p-4"
+                className="video-row-motion rounded-xl border border-[color:var(--border)] bg-[color:var(--card)] p-4"
                 data-testid={`video-needs-${item.asin}`}
                 key={`todo-${item.id}`}
               >
@@ -214,7 +214,7 @@ export function VideoTrackerBoard({ rows: initialRows }: VideoTrackerBoardProps)
             const isPending = pendingIds.has(item.id);
             return (
               <article
-                className="rounded-xl border border-[color:var(--border)] bg-[color:var(--card)] p-4"
+                className="video-row-motion rounded-xl border border-[color:var(--border)] bg-[color:var(--card)] p-4"
                 data-testid={`video-done-${item.asin}`}
                 key={`done-${item.id}`}
               >

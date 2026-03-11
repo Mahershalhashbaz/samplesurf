@@ -328,3 +328,121 @@ td {
     inset 0 -8px 16px rgba(255, 124, 87, 0.12),
     0 5px 12px rgba(15, 23, 42, 0.18);
 }
+
+@keyframes ui-fade-up {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 8px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes ui-notice {
+  from {
+    opacity: 0;
+    transform: translateY(-3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes ui-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes ui-check-pulse {
+  0% {
+    transform: scale(0.88);
+  }
+  65% {
+    transform: scale(1.04);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.ui-fade-up {
+  animation: ui-fade-up 320ms ease-out both;
+}
+
+.ui-delay-1 {
+  animation-delay: 40ms;
+}
+
+.ui-delay-2 {
+  animation-delay: 90ms;
+}
+
+.ui-delay-3 {
+  animation-delay: 140ms;
+}
+
+.ui-delay-4 {
+  animation-delay: 180ms;
+}
+
+.notice-anim {
+  animation: ui-notice 180ms ease-out both;
+}
+
+.video-row-motion {
+  animation: ui-fade-up 260ms ease-out both;
+  transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+.video-row-motion:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.1);
+}
+
+.fab-float-btn {
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+.fab-float-btn:active {
+  transform: scale(0.94);
+}
+
+.success-overlay-card {
+  animation: ui-scale-in 280ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.success-check-wrap {
+  border-radius: 9999px;
+  padding: 0.35rem;
+  background: color-mix(in srgb, var(--success) 18%, transparent);
+  animation: ui-check-pulse 520ms ease-out;
+}
+
+.success-check-icon {
+  color: var(--success);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-fade-up,
+  .notice-anim,
+  .video-row-motion,
+  .success-overlay-card,
+  .success-check-wrap {
+    animation: none !important;
+  }
+
+  .fab-float-btn:active,
+  .video-row-motion:hover {
+    transform: none;
+  }
+}

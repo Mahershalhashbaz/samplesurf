@@ -2,8 +2,8 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { CircleDollarSign, Download, FileUp, PlusCircle, TrendingDown, Wallet } from "lucide-react";
 
+import { CountUpValue } from "@/components/CountUpValue";
 import { KpiCard } from "@/components/KpiCard";
-import { formatCents } from "@/lib/money";
 import { getDashboardMetrics } from "@/lib/queries";
 import { parseTaxYear } from "@/lib/year";
 
@@ -31,7 +31,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
 
   return (
     <div className="space-y-4 md:space-y-6">
-      <section className="app-card">
+      <section className="app-card ui-fade-up" style={{ animationDelay: "40ms" }}>
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
             <h2 className="text-xl font-semibold text-ink md:text-2xl">Dashboard - {year}</h2>
@@ -42,13 +42,26 @@ export default async function DashboardPage({ searchParams }: PageProps) {
       </section>
 
       <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <KpiCard label="Unsold Inventory" value={String(metrics.unsoldInventoryCount)} />
-        <KpiCard label={`Sample Income (${year})`} value={formatCents(metrics.sampleIncomeCents)} />
         <KpiCard
-          label={`Disposition Gain/Loss (${year})`}
-          value={formatCents(metrics.dispositionGainLossCents)}
+          className="ui-fade-up ui-delay-1"
+          label="Unsold Inventory"
+          value={<CountUpValue kind="number" value={metrics.unsoldInventoryCount} />}
         />
-        <KpiCard label="Needs Attention" value={String(metrics.needsAttentionCount)} />
+        <KpiCard
+          className="ui-fade-up ui-delay-2"
+          label={`Sample Income (${year})`}
+          value={<CountUpValue kind="currencyCents" value={metrics.sampleIncomeCents} />}
+        />
+        <KpiCard
+          className="ui-fade-up ui-delay-3"
+          label={`Disposition Gain/Loss (${year})`}
+          value={<CountUpValue kind="currencyCents" value={metrics.dispositionGainLossCents} />}
+        />
+        <KpiCard
+          className="ui-fade-up ui-delay-4"
+          label="Needs Attention"
+          value={<CountUpValue kind="number" value={metrics.needsAttentionCount} />}
+        />
       </section>
 
       <section className="space-y-2 md:space-y-3">
@@ -58,29 +71,32 @@ export default async function DashboardPage({ searchParams }: PageProps) {
         </div>
         <div className="grid grid-cols-1 gap-3 md:grid-cols-3 md:gap-4">
           <KpiCard
+            className="ui-fade-up ui-delay-1"
             label="Gross Income (Samples Received)"
             icon={CircleDollarSign}
             testId="tax-summary-gross"
-            value={formatCents(metrics.taxSummary.grossSampleIncomeCents)}
+            value={<CountUpValue kind="currencyCents" value={metrics.taxSummary.grossSampleIncomeCents} />}
           />
           <KpiCard
+            className="ui-fade-up ui-delay-2"
             hint="Absolute value of negative gain/loss lines"
             icon={TrendingDown}
             label="Loss"
             testId="tax-summary-loss"
-            value={formatCents(metrics.taxSummary.lossCents)}
+            value={<CountUpValue kind="currencyCents" value={metrics.taxSummary.lossCents} />}
           />
           <KpiCard
+            className="ui-fade-up ui-delay-3"
             icon={Wallet}
             label="Net Total"
             testId="tax-summary-net"
-            value={formatCents(metrics.taxSummary.netTotalCents)}
+            value={<CountUpValue kind="currencyCents" value={metrics.taxSummary.netTotalCents} />}
             hint="Gross sample income + disposition gain/loss"
           />
         </div>
       </section>
 
-      <section className="app-card">
+      <section className="app-card ui-fade-up" style={{ animationDelay: "120ms" }}>
         <h3 className="mb-3 text-sm font-semibold uppercase tracking-[0.16em] text-slate1">Quick Actions</h3>
         <div className="grid grid-cols-1 gap-2 sm:flex sm:flex-wrap">
           <Link className="btn-primary inline-flex w-full items-center justify-center gap-1.5 sm:w-auto" href={`/items/new?year=${year}`}>
@@ -102,13 +118,15 @@ export default async function DashboardPage({ searchParams }: PageProps) {
         </div>
       </section>
 
-      <DashboardCharts
-        dispositionMix={metrics.charts.dispositionMix}
-        monthlyDispositionGainLoss={metrics.charts.monthlyDispositionGainLoss}
-        monthlySampleIncome={metrics.charts.monthlySampleIncome}
-        topReceiptItems={metrics.charts.topReceiptItems}
-        year={year}
-      />
+      <div className="ui-fade-up" style={{ animationDelay: "160ms" }}>
+        <DashboardCharts
+          dispositionMix={metrics.charts.dispositionMix}
+          monthlyDispositionGainLoss={metrics.charts.monthlyDispositionGainLoss}
+          monthlySampleIncome={metrics.charts.monthlySampleIncome}
+          topReceiptItems={metrics.charts.topReceiptItems}
+          year={year}
+        />
+      </div>
     </div>
   );
 }

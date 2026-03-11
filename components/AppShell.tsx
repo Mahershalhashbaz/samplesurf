@@ -402,7 +402,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       {showGlobalQuickAdd ? (
         <Link
           aria-label="Quick add item"
-          className="btn-primary fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] right-4 z-[70] inline-flex h-14 w-14 items-center justify-center rounded-full p-0 shadow-2xl md:hidden"
+          className="fab-float-btn btn-primary fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] right-4 z-[70] inline-flex h-14 w-14 items-center justify-center rounded-full p-0 shadow-2xl md:hidden"
           href={hrefWithYear("/items/new", activeYear)}
         >
           <PlusCircle aria-hidden="true" size={22} />
