@@ -65,6 +65,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [isDarkTheme, setIsDarkTheme] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const searchString = searchParams.toString();
+  const showGlobalQuickAdd = pathname !== "/items/new" && !mobileNavOpen;
 
   const rawYear = searchParams.get("year");
   const urlYear = parseYear(rawYear);
@@ -395,8 +396,18 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </nav>
         </aside>
 
-        <main className="space-y-4 md:space-y-6">{children}</main>
+        <main className="space-y-5 md:space-y-6">{children}</main>
       </div>
+
+      {showGlobalQuickAdd ? (
+        <Link
+          aria-label="Quick add item"
+          className="btn-primary fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] right-4 z-[70] inline-flex h-14 w-14 items-center justify-center rounded-full p-0 shadow-2xl md:hidden"
+          href={hrefWithYear("/items/new", activeYear)}
+        >
+          <PlusCircle aria-hidden="true" size={22} />
+        </Link>
+      ) : null}
     </div>
   );
 }

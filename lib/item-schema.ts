@@ -29,7 +29,7 @@ export const itemPayloadSchema = z
     soldDate: baseDateStringSchema,
     saleProceedsCents: z.number().int().min(0).nullable().optional(),
     notes: baseNotesSchema,
-    videoDone: z.boolean().optional().default(true),
+    videoDone: z.boolean().optional().default(false),
     videoDoneAt: baseDateStringSchema,
     videoSlaDays: z.number().int().min(1).optional().default(14),
     videoNotes: baseNotesSchema,

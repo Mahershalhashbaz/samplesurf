@@ -52,7 +52,7 @@ function parseRequiredDate(dateInput: string): Date {
 export function toItemDbInput(input: ItemPayload): Prisma.ItemUncheckedCreateInput {
   const receivedDate = parseRequiredDate(input.receivedDate);
   const soldDate = parseDateOnly(input.soldDate ?? undefined);
-  const videoDone = input.videoDone ?? true;
+  const videoDone = input.videoDone ?? false;
   const videoDoneAt = videoDone
     ? parseDateOnly(input.videoDoneAt ?? undefined) ?? new Date()
     : null;

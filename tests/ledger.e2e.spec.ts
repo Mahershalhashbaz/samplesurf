@@ -320,4 +320,18 @@ test("dashboard mobile quick add FAB opens add item page", async ({ page }) => {
   await expect(fab).toBeVisible();
   await fab.click();
   await expect(page).toHaveURL(/\/items\/new\?year=2026/);
+  await expect(page.getByLabel("Quick add item")).toHaveCount(0);
+});
+
+test("new items default videoDone to false", async ({ request }) => {
+  const asin = uniqueAsin("VIDF");
+  const response = await request.post("/api/items", {
+    data: baseCreatePayload(asin, "2026-03-11"),
+  });
+
+  expect(response.status()).toBe(201);
+  const payload = (await response.json()) as {
+    item: { videoDone?: boolean };
+  };
+  expect(payload.item.videoDone).toBe(false);
 });

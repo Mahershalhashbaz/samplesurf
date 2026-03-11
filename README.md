@@ -41,6 +41,14 @@ The app intentionally **does not** include scraping, storefront syncing, browser
   - install/home-screen icon uses full-bleed square asset (`/public/app-icon-1024.png`)
   - in-app header/sidebar logo uses rounded asset (`/public/samplesurf-logo-rounded.png`)
 
+## SampleSurf V4.1 UX Updates
+
+- Global mobile floating quick-add button (`+`) on all pages except Add Item
+- New item default video status now starts as `videoDone = false`
+- Video Tracker metrics cards (open, overdue, due soon, oldest open, completed this week)
+- Mobile spacing adjustments and iPhone input zoom prevention (`font-size: 16px` for form controls)
+- "Open in Amazon (top match)" now always opens a sanitized Amazon search URL
+
 ## Stack
 
 - Next.js (App Router) + TypeScript

@@ -136,6 +136,22 @@ function deriveAmazonSearchQuery(titleCandidate: string | null, manualTitle: str
   return base.slice(0, 80).trim();
 }
 
+function cleanAmazonSearchTerm(raw: string): string {
+  return raw
+    .replace(/^amazon\.com\s*[:|\-]\s*/i, "")
+    .replace(/[^\w\s'-]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function buildAmazonSearchUrl(raw: string): string | null {
+  const cleaned = cleanAmazonSearchTerm(raw);
+  if (cleaned.length < 2) {
+    return null;
+  }
+  return `https://www.amazon.com/s?k=${encodeURIComponent(cleaned)}`;
+}
+
 export function AddItemForm() {
   const [form, setForm] = useState<FormState>(initialState);
   const [saving, setSaving] = useState(false);
@@ -601,6 +617,8 @@ export function AddItemForm() {
   const trimmedScanSearchQuery = scanSearchQuery.trim();
   const topSearchResults = scanSearchResults.slice(0, 5);
   const topMatch = topSearchResults[0] ?? null;
+  const topMatchSearchUrl = topMatch ? buildAmazonSearchUrl(topMatch.title) : null;
+  const fallbackSearchUrl = buildAmazonSearchUrl(trimmedScanSearchQuery);
 
   function openExternalUrl(url: string) {
     if (!url) {
@@ -989,24 +1007,25 @@ export function AddItemForm() {
                     </div>
 
                     <div className="mt-3 flex flex-wrap gap-2">
+                      {topMatchSearchUrl ? (
+                        <button
+                          className="btn-secondary inline-flex items-center gap-1.5 px-3 py-1.5"
+                          onClick={() => {
+                            openExternalUrl(topMatchSearchUrl);
+                          }}
+                          type="button"
+                        >
+                          <Eye aria-hidden="true" size={14} />
+                          Open in Amazon (top match)
+                        </button>
+                      ) : null}
                       <button
                         className="btn-secondary inline-flex items-center gap-1.5 px-3 py-1.5"
-                        disabled={!topMatch}
+                        disabled={!fallbackSearchUrl}
                         onClick={() => {
-                          if (topMatch) {
-                            openExternalUrl(topMatch.url);
+                          if (fallbackSearchUrl) {
+                            openExternalUrl(fallbackSearchUrl);
                           }
-                        }}
-                        type="button"
-                      >
-                        <Eye aria-hidden="true" size={14} />
-                        Open in Amazon (top match)
-                      </button>
-                      <button
-                        className="btn-secondary inline-flex items-center gap-1.5 px-3 py-1.5"
-                        disabled={trimmedScanSearchQuery.length < 2}
-                        onClick={() => {
-                          openExternalUrl(`https://www.amazon.com/s?k=${encodeURIComponent(trimmedScanSearchQuery)}`);
                         }}
                         type="button"
                       >

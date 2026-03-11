@@ -109,14 +109,6 @@ export default async function DashboardPage({ searchParams }: PageProps) {
         topReceiptItems={metrics.charts.topReceiptItems}
         year={year}
       />
-
-      <Link
-        aria-label="Quick add item"
-        className="btn-primary fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] right-4 z-[60] inline-flex h-14 w-14 items-center justify-center rounded-full p-0 shadow-2xl md:hidden"
-        href={`/items/new?year=${year}`}
-      >
-        <PlusCircle aria-hidden="true" size={22} />
-      </Link>
     </div>
   );
 }

@@ -83,8 +83,8 @@ textarea {
   border-radius: 0.75rem;
   border: 1px solid var(--border);
   background: var(--white);
-  padding: 0.55rem 0.75rem;
-  font-size: 0.9rem;
+  padding: 0.65rem 0.8rem;
+  font-size: 16px;
   color: var(--ink);
   outline: none;
   transition: border-color 160ms ease, box-shadow 160ms ease;
@@ -99,8 +99,8 @@ textarea:focus {
 
 button {
   border-radius: 0.75rem;
-  padding: 0.55rem 0.95rem;
-  font-size: 0.9rem;
+  padding: 0.65rem 1rem;
+  font-size: 0.95rem;
   font-weight: 600;
   transition: all 160ms ease;
 }
@@ -113,14 +113,14 @@ table {
 th,
 td {
   border-bottom: 1px solid color-mix(in srgb, var(--slate2) 26%, white);
-  padding: 0.7rem;
+  padding: 0.78rem;
   text-align: left;
   vertical-align: top;
 }
 
 @layer components {
   .app-card {
-   @apply rounded-2xl border p-4 shadow-soft md:p-6;
+   @apply rounded-2xl border p-5 shadow-soft md:p-6;
     background: var(--card);
     border-color: var(--border);
   }
