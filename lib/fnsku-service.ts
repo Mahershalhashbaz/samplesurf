@@ -116,6 +116,8 @@ export async function fetchFnskuAsinFromApi(
       method: "POST",
       cache: "no-store",
       headers: {
+        Accept: "application/json",
+        "Accept-Language": "en-US,en;q=0.9",
         "Content-Type": "application/json",
         "Api-Key": apiKey,
       },
