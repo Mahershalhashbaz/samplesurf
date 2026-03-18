@@ -3,6 +3,8 @@ import path from "node:path";
 
 import sharp from "sharp";
 
+import { extractResolvableCodesFromOcrText } from "./fnsku";
+
 // OCR often confuses zero and O, so accept B0/BO and normalize to B0.
 const ASIN_FROM_OCR_PATTERN = /\bB[0O][A-Z0-9]{8}\b/gi;
 
@@ -18,6 +20,10 @@ export type ScanPayload = {
   titleCandidate: string | null;
   suggestedTitle: string | null;
   confidence: number | null;
+  detectedCode: string | null;
+  codeType: "ASIN" | "FNSKU" | null;
+  resolutionSource: "direct" | "cache" | "api" | "unresolved" | "error" | null;
+  resolutionMessage: string | null;
 };
 
 function normalizeOcrSnippet(text: string): string {
@@ -315,15 +321,30 @@ export function extractAsinsFromOcrText(text: string): string[] {
   return asins;
 }
 
-export function buildScanPayload(text: string, confidence: number | null): ScanPayload {
+export function buildScanPayload(
+  text: string,
+  confidence: number | null,
+  options?: {
+    asins?: string[];
+    detectedCode?: string | null;
+    codeType?: "ASIN" | "FNSKU" | null;
+    resolutionSource?: "direct" | "cache" | "api" | "unresolved" | "error" | null;
+    resolutionMessage?: string | null;
+  },
+): ScanPayload {
   const titleCandidate = extractSuggestedTitleFromOcrText(text);
+  const detectedCode = options?.detectedCode ?? extractResolvableCodesFromOcrText(text)[0] ?? null;
   return {
     ok: true,
-    asins: extractAsinsFromOcrText(text),
+    asins: options?.asins ?? extractAsinsFromOcrText(text),
     ocrTextSnippet: normalizeOcrSnippet(text),
     titleCandidate,
     suggestedTitle: titleCandidate,
     confidence: Number.isFinite(confidence) ? Number(confidence?.toFixed(2)) : null,
+    detectedCode,
+    codeType: options?.codeType ?? null,
+    resolutionSource: options?.resolutionSource ?? null,
+    resolutionMessage: options?.resolutionMessage ?? null,
   };
 }
 

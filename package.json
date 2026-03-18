@@ -10,7 +10,7 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "db:push": "prisma db push",
-    "test:unit": "tsc -p tests/tsconfig.unit.json && node --test .tmp-unit/tests/asin-extract.test.js .tmp-unit/tests/amazon-title.test.js .tmp-unit/tests/amazon-search.test.js .tmp-unit/tests/nav-match.test.js .tmp-unit/tests/scan-asin.test.js .tmp-unit/tests/scan-api.test.js",
+    "test:unit": "tsc -p tests/tsconfig.unit.json && node --test .tmp-unit/tests/asin-extract.test.js .tmp-unit/tests/amazon-title.test.js .tmp-unit/tests/amazon-search.test.js .tmp-unit/tests/fnsku.test.js .tmp-unit/tests/nav-match.test.js .tmp-unit/tests/scan-asin.test.js .tmp-unit/tests/scan-api.test.js",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui"
   },

@@ -19,11 +19,12 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { DatePicker } from "@/components/DatePicker";
 import { extractAsinFromAmazonUrl } from "@/lib/amazon";
 import { todayDateInput } from "@/lib/dates";
+import { detectScannableCodeKind } from "@/lib/fnsku";
 import { parseMoneyToCents } from "@/lib/money";
 
 type LookupState = "idle" | "loading" | "done" | "failed";
@@ -62,6 +63,18 @@ type ScanResponse = {
   titleCandidate: string | null;
   suggestedTitle?: string | null;
   confidence: number | null;
+  detectedCode: string | null;
+  codeType: "ASIN" | "FNSKU" | null;
+  resolutionSource: "direct" | "cache" | "api" | "unresolved" | "error" | null;
+  resolutionMessage: string | null;
+};
+
+type FnskuResolveResponse = {
+  code: string;
+  codeKind: "asin" | "fnsku" | "unknown";
+  asin: string | null;
+  source: "direct" | "cache" | "api" | "unresolved" | "error";
+  message: string | null;
 };
 
 type AmazonSearchResult = {
@@ -158,6 +171,8 @@ export function AddItemForm() {
   const [lookupState, setLookupState] = useState<LookupState>("idle");
   const [autofilledFromAmazon, setAutofilledFromAmazon] = useState(false);
   const [lastLookupUrl, setLastLookupUrl] = useState("");
+  const [fnskuLookupState, setFnskuLookupState] = useState<"idle" | "loading" | "resolved" | "failed">("idle");
+  const [fnskuMessage, setFnskuMessage] = useState<string | null>(null);
   const [duplicateMatch, setDuplicateMatch] = useState<DuplicateItemSummary | null>(null);
   const [checkingDuplicate, setCheckingDuplicate] = useState(false);
   const [allowDuplicateAsin, setAllowDuplicateAsin] = useState<string | null>(null);
@@ -173,12 +188,14 @@ export function AddItemForm() {
   const [scanSearchError, setScanSearchError] = useState<string | null>(null);
   const [scanSuccess, setScanSuccess] = useState<string | null>(null);
   const lookupRequestId = useRef(0);
+  const fnskuRequestId = useRef(0);
   const duplicateRequestId = useRef(0);
   const scanRequestId = useRef(0);
   const scanInputRef = useRef<HTMLInputElement | null>(null);
   const asinInputRef = useRef<HTMLInputElement | null>(null);
   const titleRef = useRef(form.title);
   const successTimeoutRef = useRef<number | null>(null);
+  const fnskuMessageTimeoutRef = useRef<number | null>(null);
 
   function update<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -220,6 +237,65 @@ export function AddItemForm() {
       }
     }
   }
+
+  const resolveFnskuCode = useCallback(async (rawCode: string) => {
+    const normalizedCode = rawCode.trim().toUpperCase();
+    if (!normalizedCode) {
+      clearFnskuMessageTimer();
+      setFnskuLookupState("idle");
+      setFnskuMessage(null);
+      return;
+    }
+
+    fnskuRequestId.current += 1;
+    const requestId = fnskuRequestId.current;
+    clearFnskuMessageTimer();
+    setFnskuLookupState("loading");
+    setFnskuMessage("Looking up FNSKU...");
+
+    try {
+      const response = await fetch(`/api/fnsku/resolve?code=${encodeURIComponent(normalizedCode)}`);
+      if (requestId !== fnskuRequestId.current) {
+        return;
+      }
+
+      if (!response.ok) {
+        setFnskuLookupState("failed");
+        setFnskuMessage("Could not resolve this FNSKU. You can continue with Amazon search or manual entry.");
+        return;
+      }
+
+      const payload = (await response.json()) as FnskuResolveResponse;
+      if (requestId !== fnskuRequestId.current) {
+        return;
+      }
+
+      if (!payload.asin) {
+        setFnskuLookupState("failed");
+        setFnskuMessage(payload.message ?? "No ASIN was returned for this FNSKU.");
+        return;
+      }
+
+      setFnskuLookupState("resolved");
+      setFnskuMessage("ASIN found");
+      fnskuMessageTimeoutRef.current = window.setTimeout(() => {
+        setFnskuLookupState("idle");
+        setFnskuMessage(null);
+        fnskuMessageTimeoutRef.current = null;
+      }, 1800);
+      setForm((prev) => ({
+        ...prev,
+        asin: payload.asin ?? prev.asin,
+      }));
+      void lookupAmazon(`https://www.amazon.com/dp/${payload.asin}`);
+    } catch {
+      if (requestId !== fnskuRequestId.current) {
+        return;
+      }
+      setFnskuLookupState("failed");
+      setFnskuMessage("Could not resolve this FNSKU. You can continue with Amazon search or manual entry.");
+    }
+  }, []);
 
   async function lookupAmazon(rawUrl: string) {
     const trimmed = rawUrl.trim();
@@ -296,8 +372,33 @@ export function AddItemForm() {
   }, [form.amazonUrl, lastLookupUrl]);
 
   useEffect(() => {
-    setAllowDuplicateAsin(null);
+    const codeKind = detectScannableCodeKind(normalizedAsin);
     if (!normalizedAsin) {
+      fnskuRequestId.current += 1;
+      clearFnskuMessageTimer();
+      setFnskuLookupState("idle");
+      setFnskuMessage(null);
+      setAllowDuplicateAsin(null);
+      setDuplicateMatch(null);
+      setCheckingDuplicate(false);
+      return;
+    }
+
+    if (codeKind === "fnsku") {
+      const timeout = window.setTimeout(() => {
+        void resolveFnskuCode(normalizedAsin);
+      }, 220);
+
+      return () => window.clearTimeout(timeout);
+    }
+
+    fnskuRequestId.current += 1;
+    setAllowDuplicateAsin(null);
+
+    if (codeKind !== "asin") {
+      clearFnskuMessageTimer();
+      setFnskuLookupState("idle");
+      setFnskuMessage(null);
       setDuplicateMatch(null);
       setCheckingDuplicate(false);
       return;
@@ -308,7 +409,7 @@ export function AddItemForm() {
     }, 220);
 
     return () => window.clearTimeout(timeout);
-  }, [normalizedAsin]);
+  }, [normalizedAsin, resolveFnskuCode]);
 
   function clearAmazonUrl() {
     update("amazonUrl", "");
@@ -321,6 +422,13 @@ export function AddItemForm() {
     if (successTimeoutRef.current !== null) {
       window.clearTimeout(successTimeoutRef.current);
       successTimeoutRef.current = null;
+    }
+  }
+
+  function clearFnskuMessageTimer() {
+    if (fnskuMessageTimeoutRef.current !== null) {
+      window.clearTimeout(fnskuMessageTimeoutRef.current);
+      fnskuMessageTimeoutRef.current = null;
     }
   }
 
@@ -361,6 +469,9 @@ export function AddItemForm() {
     setLookupState("idle");
     setAutofilledFromAmazon(false);
     setLastLookupUrl("");
+    clearFnskuMessageTimer();
+    setFnskuLookupState("idle");
+    setFnskuMessage(null);
     setDuplicateMatch(null);
     setCheckingDuplicate(false);
     setAllowDuplicateAsin(null);
@@ -388,14 +499,14 @@ export function AddItemForm() {
     clearScanPreview();
   }
 
-  async function applyDetectedAsin(asin: string) {
+  async function applyDetectedAsin(asin: string, successMessage = "ASIN detected from photo.") {
     const normalized = asin.trim().toUpperCase();
     if (!normalized) {
       return;
     }
 
     update("asin", normalized);
-    setScanSuccess("ASIN detected from photo.");
+    setScanSuccess(successMessage);
     setScanError(null);
     setAllowDuplicateAsin(null);
     setDuplicateMatch(null);
@@ -472,8 +583,16 @@ export function AddItemForm() {
         return;
       }
       if (payload.asins.length === 1) {
-        await applyDetectedAsin(payload.asins[0] ?? "");
+        const successMessage =
+          payload.codeType === "FNSKU" && payload.resolutionSource && payload.resolutionSource !== "unresolved" && payload.resolutionSource !== "error"
+            ? "ASIN found"
+            : "ASIN detected from photo.";
+        await applyDetectedAsin(payload.asins[0] ?? "", successMessage);
         return;
+      }
+
+      if (payload.codeType === "FNSKU" && payload.resolutionMessage) {
+        setScanError(payload.resolutionMessage);
       }
 
       if (payload.asins.length === 0) {
@@ -603,6 +722,10 @@ export function AddItemForm() {
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (detectScannableCodeKind(normalizedAsin) === "fnsku") {
+      setError("FNSKU is still unresolved. Wait for the ASIN lookup or replace it manually.");
+      return;
+    }
     if (duplicateBlocked) {
       setError("Oops - looks like you already added this item.");
       return;
@@ -633,10 +756,12 @@ export function AddItemForm() {
   useEffect(() => {
     return () => {
       clearSuccessTimer();
+      clearFnskuMessageTimer();
     };
   }, []);
 
   const duplicateBlocked = Boolean(duplicateMatch && allowDuplicateAsin !== normalizedAsin);
+  const activeCodeKind = detectScannableCodeKind(normalizedAsin);
   const trimmedScanSearchQuery = scanSearchQuery.trim();
   const topSearchResults = scanSearchResults.slice(0, 5);
   const topMatch = topSearchResults[0] ?? null;
@@ -730,12 +855,29 @@ export function AddItemForm() {
             <input
               data-testid="add-asin"
               id="asin"
-              onChange={(e) => update("asin", e.target.value.toUpperCase())}
+              onChange={(e) => {
+                update("asin", e.target.value.toUpperCase());
+                setError(null);
+              }}
               ref={asinInputRef}
               required
               value={form.asin}
             />
             {checkingDuplicate && normalizedAsin ? <p className="mt-1 text-xs text-slate1">Checking duplicates...</p> : null}
+            {(activeCodeKind === "fnsku" || fnskuLookupState === "resolved" || fnskuLookupState === "failed") &&
+            fnskuMessage ? (
+              <p
+                className={`mt-1 text-xs ${
+                  fnskuLookupState === "failed"
+                    ? "text-amber-700"
+                    : fnskuLookupState === "resolved"
+                      ? "text-emerald-700"
+                      : "text-slate1"
+                }`}
+              >
+                {fnskuMessage}
+              </p>
+            ) : null}
           </div>
 
           <div>

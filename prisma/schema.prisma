@@ -31,3 +31,13 @@ model Item {
   @@index([receivedDate])
   @@index([soldDate])
 }
+
+model FnskuResolutionCache {
+  fnskuCode  String   @id
+  asin       String
+  resolvedAt DateTime @default(now())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([resolvedAt])
+}
