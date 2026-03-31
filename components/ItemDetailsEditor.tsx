@@ -6,6 +6,7 @@ import {
   Copy,
   DollarSign,
   ExternalLink,
+  Gift,
   PackageCheck,
   Save,
   Tag,
@@ -18,6 +19,7 @@ import { useRouter } from "next/navigation";
 import { buildAmazonDetailUrl, isAmazonDetailAsin } from "@/lib/amazon-link";
 import { DatePicker } from "@/components/DatePicker";
 import { gainLossCents } from "@/lib/accounting";
+import { todayDateInput } from "@/lib/dates";
 import { centsToDecimalString, formatCents, parseMoneyToCents } from "@/lib/money";
 
 type ItemDetailsEditorProps = {
@@ -74,6 +76,8 @@ export function ItemDetailsEditor({ item }: ItemDetailsEditorProps) {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [giveAwayOpen, setGiveAwayOpen] = useState(false);
+  const [giveAwayDate, setGiveAwayDate] = useState(item.dispositionType === "GAVE_AWAY" && item.soldDate ? item.soldDate : todayDateInput());
 
   function update<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -217,6 +221,44 @@ export function ItemDetailsEditor({ item }: ItemDetailsEditorProps) {
 
     const payload = (await response.json()) as { item: { id: string } };
     router.push(`/items/${payload.item.id}`);
+  }
+
+  async function confirmGiveAway() {
+    if (!giveAwayDate) {
+      setError("Give away date is required");
+      return;
+    }
+
+    setSaving(true);
+    setError(null);
+    setMessage(null);
+
+    const response = await fetch(`/api/items/${item.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        dispositionType: "GAVE_AWAY",
+        soldDate: giveAwayDate,
+        saleProceedsCents: 0,
+      }),
+    });
+
+    if (!response.ok) {
+      const payload = (await response.json()) as { error?: string };
+      setError(payload.error ?? "Could not mark item as given away");
+      setSaving(false);
+      return;
+    }
+
+    setForm((prev) => ({
+      ...prev,
+      dispositionType: "GAVE_AWAY",
+      soldDate: giveAwayDate,
+      saleProceeds: "",
+    }));
+    setGiveAwayOpen(false);
+    setMessage("Item marked as given away");
+    setSaving(false);
   }
 
   async function removeItem() {
@@ -409,6 +451,71 @@ export function ItemDetailsEditor({ item }: ItemDetailsEditorProps) {
           <Trash2 aria-hidden="true" size={15} />
           Delete
         </button>
+      </div>
+
+      <div className="rounded-2xl border border-[color:var(--border)] bg-ice/45 p-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-sm font-semibold text-ink">Give Away</p>
+            <p className="text-xs text-slate1">
+              Quickly mark this item as given away without manually changing every field.
+            </p>
+          </div>
+          <button
+            className="btn-secondary inline-flex w-full items-center justify-center gap-1.5 sm:w-auto"
+            disabled={saving}
+            onClick={() => {
+              setGiveAwayDate(form.dispositionType === "GAVE_AWAY" && form.soldDate ? form.soldDate : todayDateInput());
+              setGiveAwayOpen((prev) => !prev);
+              setError(null);
+              setMessage(null);
+            }}
+            type="button"
+          >
+            <Gift aria-hidden="true" size={15} />
+            {form.dispositionType === "GAVE_AWAY" ? "Update Give Away" : "Give Away"}
+          </button>
+        </div>
+
+        {giveAwayOpen ? (
+          <div className="mt-4 rounded-xl border border-[color:var(--border)] bg-[color:var(--card)] p-4">
+            <div className="grid gap-3 md:grid-cols-[minmax(0,220px)_1fr] md:items-end">
+              <div>
+                <label className="mb-1 flex items-center gap-1.5 text-sm font-medium" htmlFor="detail-give-away-date">
+                  <CalendarDays aria-hidden="true" size={14} />
+                  Give Away Date
+                </label>
+                <DatePicker
+                  id="detail-give-away-date"
+                  onChange={(nextDate) => setGiveAwayDate(nextDate)}
+                  value={giveAwayDate}
+                />
+              </div>
+              <div className="flex flex-col gap-2 sm:flex-row md:justify-start">
+                <button
+                  className="btn-primary inline-flex w-full items-center justify-center gap-1.5 sm:w-auto"
+                  disabled={saving}
+                  onClick={confirmGiveAway}
+                  type="button"
+                >
+                  <Gift aria-hidden="true" size={15} />
+                  Confirm Give Away
+                </button>
+                <button
+                  className="btn-secondary w-full sm:w-auto"
+                  disabled={saving}
+                  onClick={() => {
+                    setGiveAwayOpen(false);
+                    setGiveAwayDate(form.dispositionType === "GAVE_AWAY" && form.soldDate ? form.soldDate : todayDateInput());
+                  }}
+                  type="button"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : null}
       </div>
     </div>
   );
