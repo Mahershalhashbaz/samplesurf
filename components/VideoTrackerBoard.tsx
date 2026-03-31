@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { CheckCircle2, Circle, Loader2 } from "lucide-react";
+import { CheckCircle2, Circle, Loader2, Search } from "lucide-react";
 import { useMemo, useState } from "react";
 
 export type VideoTrackerRow = {
@@ -64,14 +64,28 @@ export function VideoTrackerBoard({ rows: initialRows }: VideoTrackerBoardProps)
   const [rows, setRows] = useState<VideoTrackerRow[]>(initialRows);
   const [pendingIds, setPendingIds] = useState<Set<string>>(new Set());
   const [error, setError] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+
+  const normalizedSearch = search.trim().toLowerCase();
+
+  const filteredRows = useMemo(() => {
+    if (!normalizedSearch) {
+      return rows;
+    }
+
+    return rows.filter((item) => {
+      const haystack = [item.title, item.asin, item.videoNotes ?? ""].join(" ").toLowerCase();
+      return haystack.includes(normalizedSearch);
+    });
+  }, [normalizedSearch, rows]);
 
   const needsVideo = useMemo(
-    () => rows.filter((item) => item.videoDone === false).sort(sortNeedsVideo),
-    [rows],
+    () => filteredRows.filter((item) => item.videoDone === false).sort(sortNeedsVideo),
+    [filteredRows],
   );
   const completed = useMemo(
-    () => rows.filter((item) => item.videoDone === true).sort(sortCompleted),
-    [rows],
+    () => filteredRows.filter((item) => item.videoDone === true).sort(sortCompleted),
+    [filteredRows],
   );
 
   async function updateVideoStatus(id: string, videoDone: boolean) {
@@ -135,6 +149,27 @@ export function VideoTrackerBoard({ rows: initialRows }: VideoTrackerBoardProps)
       {error ? <p className="notice-anim text-sm text-red-700">{error}</p> : null}
 
       <section className="app-card">
+        <label className="mb-2 flex items-center gap-1.5 text-sm font-medium text-ink" htmlFor="video-tracker-search">
+          <Search aria-hidden="true" size={14} />
+          Search videos
+        </label>
+        <input
+          id="video-tracker-search"
+          onChange={(event) => setSearch(event.target.value)}
+          placeholder="Search title, ASIN, or notes"
+          type="search"
+          value={search}
+        />
+      </section>
+
+      {normalizedSearch && needsVideo.length === 0 && completed.length === 0 ? (
+        <section className="app-card">
+          <p className="text-sm text-slate1">No video items match &quot;{search.trim()}&quot;.</p>
+        </section>
+      ) : null}
+
+      {!normalizedSearch || needsVideo.length > 0 || completed.length > 0 ? (
+        <section className="app-card">
         <div className="mb-3 flex items-center justify-between gap-2">
           <h3 className="text-lg font-semibold text-ink">Needs Video</h3>
           <span className="app-pill">{needsVideo.length}</span>
@@ -195,9 +230,11 @@ export function VideoTrackerBoard({ rows: initialRows }: VideoTrackerBoardProps)
             );
           })}
         </div>
-      </section>
+        </section>
+      ) : null}
 
-      <section className="app-card">
+      {!normalizedSearch || needsVideo.length > 0 || completed.length > 0 ? (
+        <section className="app-card">
         <div className="mb-3 flex items-center justify-between gap-2">
           <h3 className="text-lg font-semibold text-ink">Completed</h3>
           <span className="app-pill">{completed.length}</span>
@@ -246,7 +283,8 @@ export function VideoTrackerBoard({ rows: initialRows }: VideoTrackerBoardProps)
             );
           })}
         </div>
-      </section>
+        </section>
+      ) : null}
     </div>
   );
 }

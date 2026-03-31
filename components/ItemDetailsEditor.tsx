@@ -5,6 +5,7 @@ import {
   Clapperboard,
   Copy,
   DollarSign,
+  ExternalLink,
   PackageCheck,
   Save,
   Tag,
@@ -14,6 +15,7 @@ import {
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { buildAmazonDetailUrl, isAmazonDetailAsin } from "@/lib/amazon-link";
 import { DatePicker } from "@/components/DatePicker";
 import { gainLossCents } from "@/lib/accounting";
 import { centsToDecimalString, formatCents, parseMoneyToCents } from "@/lib/money";
@@ -102,6 +104,7 @@ export function ItemDetailsEditor({ item }: ItemDetailsEditorProps) {
     form.videoDone
       ? item.videoDoneAt ?? "Will set on save"
       : "-";
+  const amazonDetailUrl = isAmazonDetailAsin(form.asin) ? buildAmazonDetailUrl(form.asin) : null;
 
   async function save() {
     setSaving(true);
@@ -243,6 +246,17 @@ export function ItemDetailsEditor({ item }: ItemDetailsEditorProps) {
             ASIN
           </label>
           <input id="detail-asin" onChange={(e) => update("asin", e.target.value.toUpperCase())} value={form.asin} />
+          {amazonDetailUrl ? (
+            <a
+              className="btn-secondary mt-2 inline-flex items-center gap-1.5 px-3 py-1.5"
+              href={amazonDetailUrl}
+              rel="noreferrer"
+              target="_blank"
+            >
+              <ExternalLink aria-hidden="true" size={14} />
+              Open on Amazon
+            </a>
+          ) : null}
         </div>
         <div>
           <label className="mb-1 flex items-center gap-1.5 text-sm font-medium" htmlFor="detail-title">

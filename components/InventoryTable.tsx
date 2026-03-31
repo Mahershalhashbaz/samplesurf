@@ -1,9 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { InlineSoldEditor } from "@/components/InlineSoldEditor";
 import { StatusChip } from "@/components/StatusChip";
+import { buildAmazonDetailUrl, isAmazonDetailAsin } from "@/lib/amazon-link";
 import { formatCents } from "@/lib/money";
 
 export type InventoryRowView = {
@@ -39,11 +41,36 @@ export function InventoryTable({ rows }: InventoryTableProps) {
         ) : null}
 
         {rows.map((row) => (
-          <article className="rounded-xl border border-[color:var(--border)] bg-[color:var(--card)] p-4" key={`card-${row.id}`}>
+          <article
+            className="cursor-pointer rounded-xl border border-[color:var(--border)] bg-[color:var(--card)] p-4 transition hover:border-[color:var(--brand-primary)]/35 hover:shadow-soft"
+            key={`card-${row.id}`}
+            onClick={() => router.push(`/items/${row.id}`)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                router.push(`/items/${row.id}`);
+              }
+            }}
+            role="link"
+            tabIndex={0}
+          >
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <p className="truncate text-sm font-semibold text-ink">{row.title || "(missing title)"}</p>
-                <p className="mt-1 truncate font-mono text-[11px] text-slate1">{row.asin}</p>
+                {isAmazonDetailAsin(row.asin) ? (
+                  <Link
+                    className="mt-1 inline-flex truncate font-mono text-[11px] text-[color:var(--brand-violet)] underline"
+                    href={buildAmazonDetailUrl(row.asin)}
+                    onClick={(event) => event.stopPropagation()}
+                    onKeyDown={(event) => event.stopPropagation()}
+                    rel="noreferrer"
+                    target="_blank"
+                  >
+                    {row.asin}
+                  </Link>
+                ) : (
+                  <p className="mt-1 truncate font-mono text-[11px] text-slate1">{row.asin}</p>
+                )}
               </div>
               <StatusChip label={row.statusLabel} tone={row.statusTone} />
             </div>
@@ -68,10 +95,6 @@ export function InventoryTable({ rows }: InventoryTableProps) {
             </dl>
 
             {row.statusHint ? <p className="mt-2 text-xs text-amber-700">{row.statusHint}</p> : null}
-
-            <button className="btn-secondary mt-3 w-full" onClick={() => router.push(`/items/${row.id}`)} type="button">
-              View / Edit
-            </button>
           </article>
         ))}
       </div>
@@ -108,7 +131,22 @@ export function InventoryTable({ rows }: InventoryTableProps) {
               tabIndex={0}
             >
               <td>{row.receivedDate}</td>
-              <td className="font-mono text-xs">{row.asin}</td>
+              <td className="font-mono text-xs">
+                {isAmazonDetailAsin(row.asin) ? (
+                  <Link
+                    className="text-[color:var(--brand-violet)] underline"
+                    href={buildAmazonDetailUrl(row.asin)}
+                    onClick={(event) => event.stopPropagation()}
+                    onKeyDown={(event) => event.stopPropagation()}
+                    rel="noreferrer"
+                    target="_blank"
+                  >
+                    {row.asin}
+                  </Link>
+                ) : (
+                  row.asin
+                )}
+              </td>
               <td>{row.title || "(missing title)"}</td>
               <td>{row.acquisitionType}</td>
               <td>{row.dispositionType}</td>
