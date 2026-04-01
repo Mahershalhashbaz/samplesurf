@@ -274,21 +274,21 @@ export function InventoryTable({ rows }: InventoryTableProps) {
         ))}
       </div>
 
-      <table className="hidden md:table" data-testid="inventory-table">
+      <table className="hidden w-full table-fixed md:table" data-testid="inventory-table">
         <thead className="bg-ice text-xs uppercase tracking-wide text-ink/70">
           <tr>
-            <th>Received</th>
-            <th>ASIN</th>
-            <th>Title</th>
-            <th>Type</th>
-            <th>Disposition</th>
-            <th>Receipt Value</th>
-            <th>Disposed Date</th>
-            <th>Proceeds</th>
-            <th>Gain/Loss</th>
-            <th>Status</th>
-            <th>View/Edit</th>
-            <th>Inline Edit</th>
+            <th className="w-[7rem] px-3 py-3">Received</th>
+            <th className="w-[7rem] px-3 py-3">ASIN</th>
+            <th className="px-3 py-3">Title</th>
+            <th className="hidden w-[6.5rem] px-3 py-3 xl:table-cell">Type</th>
+            <th className="hidden w-[7rem] px-3 py-3 lg:table-cell">Disposition</th>
+            <th className="w-[7.5rem] px-3 py-3">Receipt Value</th>
+            <th className="hidden w-[7.5rem] px-3 py-3 xl:table-cell">Disposed Date</th>
+            <th className="hidden w-[7rem] px-3 py-3 lg:table-cell">Proceeds</th>
+            <th className="w-[7rem] px-3 py-3">Gain/Loss</th>
+            <th className="w-[8rem] px-3 py-3">Status</th>
+            <th className="w-[7.5rem] px-3 py-3">View/Edit</th>
+            <th className="w-[12.5rem] px-3 py-3">Inline Edit</th>
           </tr>
         </thead>
         <tbody>
@@ -306,11 +306,11 @@ export function InventoryTable({ rows }: InventoryTableProps) {
               }}
               tabIndex={0}
             >
-              <td>{row.receivedDate}</td>
-              <td className="font-mono text-xs">
+              <td className="px-3 py-3 align-top text-sm">{row.receivedDate}</td>
+              <td className="px-3 py-3 align-top font-mono text-xs">
                 {isAmazonDetailAsin(row.asin) ? (
                   <Link
-                    className="text-[color:var(--brand-violet)] underline"
+                    className="block truncate text-[color:var(--brand-violet)] underline"
                     href={buildAmazonDetailUrl(row.asin)}
                     onClick={(event) => event.stopPropagation()}
                     onKeyDown={(event) => event.stopPropagation()}
@@ -323,26 +323,38 @@ export function InventoryTable({ rows }: InventoryTableProps) {
                   row.asin
                 )}
               </td>
-              <td>{row.title || "(missing title)"}</td>
-              <td>{row.acquisitionType}</td>
-              <td>{row.dispositionType}</td>
-              <td>{formatCents(row.receiptValueCents)}</td>
-              <td>{row.soldDate || "-"}</td>
-              <td>{formatCents(row.saleProceedsCents)}</td>
-              <td>{formatCents(row.gainLossCents)}</td>
-              <td>
+              <td className="px-3 py-3 align-top">
+                <div className="truncate text-sm font-medium text-ink">{row.title || "(missing title)"}</div>
+              </td>
+              <td className="hidden px-3 py-3 align-top text-sm xl:table-cell">{row.acquisitionType}</td>
+              <td className="hidden px-3 py-3 align-top text-sm lg:table-cell">{row.dispositionType}</td>
+              <td className="px-3 py-3 align-top text-sm">{formatCents(row.receiptValueCents)}</td>
+              <td className="hidden px-3 py-3 align-top text-sm xl:table-cell">{row.soldDate || "-"}</td>
+              <td className="hidden px-3 py-3 align-top text-sm lg:table-cell">
+                {formatCents(row.saleProceedsCents)}
+              </td>
+              <td className="px-3 py-3 align-top text-sm">{formatCents(row.gainLossCents)}</td>
+              <td className="px-3 py-3 align-top">
                 <div className="space-y-1">
                   <StatusChip label={row.statusLabel} tone={row.statusTone} />
                   {row.statusHint ? <p className="text-xs text-amber-700">{row.statusHint}</p> : null}
                 </div>
               </td>
-              <td onClick={(event) => event.stopPropagation()} onKeyDown={(event) => event.stopPropagation()}>
-                <Link className="btn-secondary inline-flex items-center gap-1.5 px-3 py-1.5" href={itemHref(row.id)}>
+              <td
+                className="px-3 py-3 align-top"
+                onClick={(event) => event.stopPropagation()}
+                onKeyDown={(event) => event.stopPropagation()}
+              >
+                <Link className="btn-secondary inline-flex w-full items-center justify-center gap-1.5 px-3 py-1.5" href={itemHref(row.id)}>
                   <Eye aria-hidden="true" size={14} />
                   View / Edit
                 </Link>
               </td>
-              <td onClick={(event) => event.stopPropagation()} onKeyDown={(event) => event.stopPropagation()}>
+              <td
+                className="px-3 py-3 align-top"
+                onClick={(event) => event.stopPropagation()}
+                onKeyDown={(event) => event.stopPropagation()}
+              >
                 <InlineSoldEditor
                   dispositionType={row.dispositionType}
                   itemId={row.id}
@@ -363,135 +375,151 @@ export function InventoryTable({ rows }: InventoryTableProps) {
       </table>
 
       {selectedRow ? (
-        <div className="fixed inset-0 z-[10010] flex items-end justify-center p-3 sm:items-center sm:p-6">
+        <div className="fixed inset-0 z-[10010] flex items-center justify-center p-3 sm:p-6">
           <button
             aria-label="Close quick view"
             className="absolute inset-0 bg-slate-950/50 backdrop-blur-sm"
             onClick={closeQuickView}
             type="button"
           />
-          <div className="relative z-10 w-full max-w-lg rounded-3xl border border-[color:var(--border)] bg-[color:var(--card)] p-5 shadow-2xl">
-            <div className="flex items-start justify-between gap-3">
+          <div className="relative z-10 flex max-h-[90vh] w-full max-w-xl flex-col overflow-hidden rounded-3xl border border-[color:var(--border)] bg-[color:var(--card)] shadow-2xl">
+            <div className="flex items-start justify-between gap-3 border-b border-[color:var(--border)] px-4 py-4 sm:px-6 sm:py-5">
               <div className="min-w-0">
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate1">Quick View</p>
-                <h3 className="mt-1 text-lg font-semibold text-ink">{selectedRow.title || "(missing title)"}</h3>
+                <h3 className="mt-1 pr-2 text-lg font-semibold text-ink sm:text-xl">
+                  {selectedRow.title || "(missing title)"}
+                </h3>
               </div>
-              <button className="btn-secondary inline-flex h-10 w-10 items-center justify-center p-0" onClick={closeQuickView} type="button">
+              <button
+                className="btn-secondary inline-flex h-11 w-11 items-center justify-center p-0"
+                onClick={closeQuickView}
+                type="button"
+              >
                 <X aria-hidden="true" size={16} />
               </button>
             </div>
 
-            <div className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
-              <div className="rounded-xl border border-[color:var(--border)] bg-ice/45 p-3">
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate1">ASIN</p>
-                <div className="mt-1">
-                  {isAmazonDetailAsin(selectedRow.asin) ? (
-                    <a
-                      className="font-mono text-[color:var(--brand-violet)] underline"
-                      href={buildAmazonDetailUrl(selectedRow.asin)}
-                      rel="noreferrer"
-                      target="_blank"
-                    >
-                      {selectedRow.asin}
-                    </a>
-                  ) : (
-                    <p className="font-mono text-ink">{selectedRow.asin}</p>
-                  )}
+            <div className="min-h-0 overflow-y-auto overscroll-contain px-4 py-4 [-webkit-overflow-scrolling:touch] sm:px-6 sm:py-5">
+              <div className="space-y-4">
+                <div className="grid gap-3 text-sm sm:grid-cols-2">
+                  <div className="rounded-xl border border-[color:var(--border)] bg-ice/45 p-3.5">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-slate1">ASIN</p>
+                    <div className="mt-1">
+                      {isAmazonDetailAsin(selectedRow.asin) ? (
+                        <a
+                          className="break-all font-mono text-[color:var(--brand-violet)] underline"
+                          href={buildAmazonDetailUrl(selectedRow.asin)}
+                          rel="noreferrer"
+                          target="_blank"
+                        >
+                          {selectedRow.asin}
+                        </a>
+                      ) : (
+                        <p className="font-mono text-ink">{selectedRow.asin}</p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="rounded-xl border border-[color:var(--border)] bg-ice/45 p-3.5">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-slate1">Status</p>
+                    <div className="mt-2">
+                      <StatusChip label={selectedRow.statusLabel} tone={selectedRow.statusTone} />
+                    </div>
+                  </div>
+                  <div className="rounded-xl border border-[color:var(--border)] bg-ice/45 p-3.5">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-slate1">Disposition</p>
+                    <p className="mt-1 font-medium text-ink">{selectedRow.dispositionType}</p>
+                  </div>
+                  <div className="rounded-xl border border-[color:var(--border)] bg-ice/45 p-3.5">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-slate1">Receipt Value</p>
+                    <p className="mt-1 font-medium text-ink">{formatCents(selectedRow.receiptValueCents)}</p>
+                  </div>
                 </div>
-              </div>
-              <div className="rounded-xl border border-[color:var(--border)] bg-ice/45 p-3">
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate1">Status</p>
-                <div className="mt-2">
-                  <StatusChip label={selectedRow.statusLabel} tone={selectedRow.statusTone} />
-                </div>
-              </div>
-              <div className="rounded-xl border border-[color:var(--border)] bg-ice/45 p-3">
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate1">Disposition</p>
-                <p className="mt-1 font-medium text-ink">{selectedRow.dispositionType}</p>
-              </div>
-              <div className="rounded-xl border border-[color:var(--border)] bg-ice/45 p-3">
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate1">Receipt Value</p>
-                <p className="mt-1 font-medium text-ink">{formatCents(selectedRow.receiptValueCents)}</p>
+
+                {notesSnippet(selectedRow.notes) ? (
+                  <div className="rounded-xl border border-[color:var(--border)] bg-ice/45 p-3.5 text-sm">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-slate1">Notes</p>
+                    <p className="mt-1 text-ink">{notesSnippet(selectedRow.notes)}</p>
+                  </div>
+                ) : null}
+
+                {quickError ? <p className="text-sm text-red-700">{quickError}</p> : null}
+                {quickMessage ? <p className="text-sm text-emerald-700">{quickMessage}</p> : null}
+
+                {quickActionMode ? (
+                  <div className="rounded-2xl border border-[color:var(--border)] bg-ice/35 p-4 sm:p-5">
+                    <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+                      <div className="space-y-1.5">
+                        <label className="flex items-center gap-1.5 text-sm font-medium text-ink">
+                          <CalendarDays aria-hidden="true" size={14} />
+                          {quickActionMode === "giveAway" ? "Give Away Date" : "Sold Date"}
+                        </label>
+                        <DatePicker
+                          id={quickActionMode === "giveAway" ? "inventory-quick-give-away-date" : "inventory-quick-sold-date"}
+                          onChange={(nextDate) => setQuickDate(nextDate)}
+                          value={quickDate}
+                        />
+                      </div>
+                      {quickActionMode === "sell" ? (
+                        <div className="space-y-1.5">
+                          <label className="flex items-center gap-1.5 text-sm font-medium text-ink">
+                            <DollarSign aria-hidden="true" size={14} />
+                            Sale Proceeds
+                          </label>
+                          <input
+                            min="0"
+                            onChange={(event) => setQuickProceeds(event.target.value)}
+                            placeholder="0.00"
+                            step="0.01"
+                            type="number"
+                            value={quickProceeds}
+                          />
+                        </div>
+                      ) : (
+                        <div className="rounded-xl border border-[color:var(--border)] bg-[color:var(--card)] p-3.5 text-sm text-slate1">
+                          Proceeds will be set to $0.00 for a giveaway.
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                      <button
+                        className="btn-primary inline-flex min-h-11 items-center justify-center gap-1.5"
+                        disabled={savingQuickAction}
+                        onClick={confirmQuickAction}
+                        type="button"
+                      >
+                        {savingQuickAction ? (
+                          <Loader2 aria-hidden="true" className="animate-spin" size={15} />
+                        ) : quickActionMode === "giveAway" ? (
+                          <Gift aria-hidden="true" size={15} />
+                        ) : (
+                          <ShoppingBag aria-hidden="true" size={15} />
+                        )}
+                        {quickActionMode === "giveAway" ? "Confirm Give Away" : "Confirm Sell"}
+                      </button>
+                      <button
+                        className="btn-secondary min-h-11"
+                        disabled={savingQuickAction}
+                        onClick={() => {
+                          setQuickActionMode(null);
+                          setQuickDate(todayDateInput());
+                          setQuickProceeds("");
+                          setQuickError(null);
+                          setQuickMessage(null);
+                        }}
+                        type="button"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                ) : null}
               </div>
             </div>
 
-            {notesSnippet(selectedRow.notes) ? (
-              <div className="mt-3 rounded-xl border border-[color:var(--border)] bg-ice/45 p-3 text-sm">
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate1">Notes</p>
-                <p className="mt-1 text-ink">{notesSnippet(selectedRow.notes)}</p>
-              </div>
-            ) : null}
-
-            {quickError ? <p className="mt-3 text-sm text-red-700">{quickError}</p> : null}
-            {quickMessage ? <p className="mt-3 text-sm text-emerald-700">{quickMessage}</p> : null}
-
-            {quickActionMode ? (
-              <div className="mt-4 rounded-2xl border border-[color:var(--border)] bg-ice/35 p-4">
-                <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-                  <div>
-                    <label className="mb-1 flex items-center gap-1.5 text-sm font-medium text-ink">
-                      <CalendarDays aria-hidden="true" size={14} />
-                      {quickActionMode === "giveAway" ? "Give Away Date" : "Sold Date"}
-                    </label>
-                    <DatePicker
-                      id={quickActionMode === "giveAway" ? "inventory-quick-give-away-date" : "inventory-quick-sold-date"}
-                      onChange={(nextDate) => setQuickDate(nextDate)}
-                      value={quickDate}
-                    />
-                  </div>
-                  {quickActionMode === "sell" ? (
-                    <div>
-                      <label className="mb-1 flex items-center gap-1.5 text-sm font-medium text-ink">
-                        <DollarSign aria-hidden="true" size={14} />
-                        Sale Proceeds
-                      </label>
-                      <input
-                        min="0"
-                        onChange={(event) => setQuickProceeds(event.target.value)}
-                        placeholder="0.00"
-                        step="0.01"
-                        type="number"
-                        value={quickProceeds}
-                      />
-                    </div>
-                  ) : (
-                    <div className="rounded-xl border border-[color:var(--border)] bg-[color:var(--card)] p-3 text-sm text-slate1">
-                      Proceeds will be set to $0.00 for a giveaway.
-                    </div>
-                  )}
-                </div>
-
-                <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-                  <button
-                    className="btn-primary inline-flex w-full items-center justify-center gap-1.5 sm:w-auto"
-                    disabled={savingQuickAction}
-                    onClick={confirmQuickAction}
-                    type="button"
-                  >
-                    {savingQuickAction ? <Loader2 aria-hidden="true" className="animate-spin" size={15} /> : quickActionMode === "giveAway" ? <Gift aria-hidden="true" size={15} /> : <ShoppingBag aria-hidden="true" size={15} />}
-                    {quickActionMode === "giveAway" ? "Confirm Give Away" : "Confirm Sell"}
-                  </button>
-                  <button
-                    className="btn-secondary w-full sm:w-auto"
-                    disabled={savingQuickAction}
-                    onClick={() => {
-                      setQuickActionMode(null);
-                      setQuickDate(todayDateInput());
-                      setQuickProceeds("");
-                      setQuickError(null);
-                      setQuickMessage(null);
-                    }}
-                    type="button"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            ) : null}
-
-            <div className="mt-5 grid gap-2 sm:grid-cols-2">
+            <div className="grid gap-3 border-t border-[color:var(--border)] px-4 py-4 sm:grid-cols-2 sm:px-6 sm:py-5">
               <button
-                className="btn-secondary inline-flex items-center justify-center gap-1.5"
+                className="btn-secondary inline-flex min-h-11 items-center justify-center gap-1.5"
                 onClick={() => openGiveAway(selectedRow)}
                 type="button"
               >
@@ -499,18 +527,18 @@ export function InventoryTable({ rows }: InventoryTableProps) {
                 Give Away
               </button>
               <button
-                className="btn-secondary inline-flex items-center justify-center gap-1.5"
+                className="btn-secondary inline-flex min-h-11 items-center justify-center gap-1.5"
                 onClick={() => openSell(selectedRow)}
                 type="button"
               >
                 <ShoppingBag aria-hidden="true" size={15} />
                 Sell
               </button>
-              <Link className="btn-primary inline-flex items-center justify-center gap-1.5 sm:col-span-2" href={itemHref(selectedRow.id)}>
+              <Link className="btn-primary inline-flex min-h-11 items-center justify-center gap-1.5 sm:col-span-2" href={itemHref(selectedRow.id)}>
                 <Eye aria-hidden="true" size={15} />
                 Open Full Item Page
               </Link>
-              <button className="btn-secondary sm:col-span-2" onClick={closeQuickView} type="button">
+              <button className="btn-secondary min-h-11 sm:col-span-2" onClick={closeQuickView} type="button">
                 Close
               </button>
             </div>

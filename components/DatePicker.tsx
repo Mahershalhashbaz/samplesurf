@@ -138,7 +138,7 @@ export function DatePicker({
       {open ? (
         <FloatingPortal>
           <div
-            className="ss-date-picker z-[9999] rounded-2xl border bg-[color:var(--card)] p-2 shadow-xl"
+            className="ss-date-picker z-[10120] rounded-2xl border bg-[color:var(--card)] p-2 shadow-xl"
             ref={refs.setFloating}
             style={floatingStyles}
             {...getFloatingProps()}

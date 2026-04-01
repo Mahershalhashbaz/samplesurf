@@ -75,16 +75,16 @@ export function InlineSoldEditor({
   }
 
   return (
-    <div className="space-y-1">
-      <div className="flex flex-wrap items-center gap-1">
-        <select className="w-28" onChange={(e) => setType(e.target.value as typeof type)} value={type}>
+    <div className="max-w-[12rem] space-y-1.5">
+      <div className="grid gap-2">
+        <select className="w-full" onChange={(e) => setType(e.target.value as typeof type)} value={type}>
           <option value="KEPT">KEPT</option>
           <option value="SOLD">SOLD</option>
           <option value="GAVE_AWAY">GAVE_AWAY</option>
         </select>
 
         {type !== "KEPT" ? (
-          <div className="w-[220px]">
+          <div className="w-full">
             <DatePicker
               allowClear={false}
               id={`inline-sold-date-${itemId}`}
@@ -97,7 +97,7 @@ export function InlineSoldEditor({
 
         {type === "SOLD" ? (
           <input
-            className="w-24"
+            className="w-full"
             min="0"
             onChange={(e) => setProceeds(e.target.value)}
             placeholder="0.00"
@@ -107,7 +107,12 @@ export function InlineSoldEditor({
           />
         ) : null}
 
-        <button className="btn-secondary inline-flex items-center gap-1.5 px-3 py-1" disabled={saving} onClick={onSave} type="button">
+        <button
+          className="btn-secondary inline-flex w-full items-center justify-center gap-1.5 px-3 py-1.5"
+          disabled={saving}
+          onClick={onSave}
+          type="button"
+        >
           <Save aria-hidden="true" size={14} />
           {saving ? "..." : "Save"}
         </button>
