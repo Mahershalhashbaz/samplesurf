@@ -58,6 +58,7 @@ export default async function InventoryPage({ searchParams }: PageProps) {
       statusLabel: reasons.length ? "Needs attention" : isDisposed ? "Disposed" : "In inventory",
       statusTone: reasons.length ? "warn" : isDisposed ? "ok" : "default",
       statusHint: reasons[0],
+      notes: item.notes,
     };
   });
 

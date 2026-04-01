@@ -108,6 +108,7 @@ export async function getDashboardMetrics(selectedYear: number) {
 
   const unsoldInventoryCount = allItems.filter((item) => item.dispositionType === "KEPT").length;
   const needsAttentionCount = allItems.filter((item) => getNeedsAttentionReasons(item).length > 0).length;
+  const openVideoCount = allItems.filter((item) => item.videoDone === false).length;
 
   const receivedThisYear = allItems.filter(
     (item) => item.receivedDate >= range.start && item.receivedDate < range.end,
@@ -176,6 +177,7 @@ export async function getDashboardMetrics(selectedYear: number) {
     sampleIncomeCents: grossSampleIncomeCents,
     dispositionGainLossCents,
     needsAttentionCount,
+    openVideoCount,
     taxSummary: {
       grossSampleIncomeCents,
       lossCents,

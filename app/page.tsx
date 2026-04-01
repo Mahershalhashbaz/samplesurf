@@ -1,6 +1,6 @@
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { CircleDollarSign, Download, FileUp, PlusCircle, TrendingDown, Wallet } from "lucide-react";
+import { CircleDollarSign, Clapperboard, Download, FileUp, Package, PlusCircle, TrendingDown, Wallet } from "lucide-react";
 
 import { CountUpValue } from "@/components/CountUpValue";
 import { KpiCard } from "@/components/KpiCard";
@@ -45,6 +45,8 @@ export default async function DashboardPage({ searchParams }: PageProps) {
         <KpiCard
           className="ui-fade-up ui-delay-1"
           label="Unsold Inventory"
+          href={`/items?year=${year}`}
+          icon={Package}
           value={<CountUpValue kind="number" value={metrics.unsoldInventoryCount} />}
         />
         <KpiCard
@@ -59,8 +61,11 @@ export default async function DashboardPage({ searchParams }: PageProps) {
         />
         <KpiCard
           className="ui-fade-up ui-delay-4"
-          label="Needs Attention"
-          value={<CountUpValue kind="number" value={metrics.needsAttentionCount} />}
+          href={`/video-tracker?year=${year}`}
+          icon={Clapperboard}
+          label="Video Tracker"
+          value={<CountUpValue kind="number" value={metrics.openVideoCount} />}
+          hint="Open items still waiting for a video"
         />
       </section>
 
@@ -102,6 +107,14 @@ export default async function DashboardPage({ searchParams }: PageProps) {
           <Link className="btn-primary inline-flex w-full items-center justify-center gap-1.5 sm:w-auto" href={`/items/new?year=${year}`}>
             <PlusCircle aria-hidden="true" size={15} />
             Add Item
+          </Link>
+          <Link className="btn-secondary inline-flex w-full items-center justify-center gap-1.5 sm:w-auto" href={`/items?year=${year}`}>
+            <Package aria-hidden="true" size={15} />
+            Inventory
+          </Link>
+          <Link className="btn-secondary inline-flex w-full items-center justify-center gap-1.5 sm:w-auto" href={`/video-tracker?year=${year}`}>
+            <Clapperboard aria-hidden="true" size={15} />
+            Video Tracker
           </Link>
           <Link className="btn-secondary inline-flex w-full items-center justify-center gap-1.5 sm:w-auto" href={`/import?year=${year}`}>
             <FileUp aria-hidden="true" size={15} />
