@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  ArrowLeft,
   CalendarDays,
   Clapperboard,
   Copy,
@@ -23,6 +24,7 @@ import { todayDateInput } from "@/lib/dates";
 import { centsToDecimalString, formatCents, parseMoneyToCents } from "@/lib/money";
 
 type ItemDetailsEditorProps = {
+  inventoryReturnHref: string;
   item: {
     id: string;
     asin: string;
@@ -57,7 +59,7 @@ type FormState = {
   videoNotes: string;
 };
 
-export function ItemDetailsEditor({ item }: ItemDetailsEditorProps) {
+export function ItemDetailsEditor({ inventoryReturnHref, item }: ItemDetailsEditorProps) {
   const router = useRouter();
   const [form, setForm] = useState<FormState>({
     asin: item.asin,
@@ -78,6 +80,7 @@ export function ItemDetailsEditor({ item }: ItemDetailsEditorProps) {
   const [error, setError] = useState<string | null>(null);
   const [giveAwayOpen, setGiveAwayOpen] = useState(false);
   const [giveAwayDate, setGiveAwayDate] = useState(item.dispositionType === "GAVE_AWAY" && item.soldDate ? item.soldDate : todayDateInput());
+  const [showInventoryReturn, setShowInventoryReturn] = useState(false);
 
   function update<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -258,6 +261,7 @@ export function ItemDetailsEditor({ item }: ItemDetailsEditorProps) {
     }));
     setGiveAwayOpen(false);
     setMessage("Item marked as given away");
+    setShowInventoryReturn(true);
     setSaving(false);
   }
 
@@ -434,6 +438,16 @@ export function ItemDetailsEditor({ item }: ItemDetailsEditorProps) {
 
       {error ? <p className="text-sm text-red-700">{error}</p> : null}
       {message ? <p className="text-sm text-emerald-700">{message}</p> : null}
+      {showInventoryReturn ? (
+        <button
+          className="btn-secondary inline-flex w-full items-center justify-center gap-1.5 sm:w-auto"
+          onClick={() => router.push(inventoryReturnHref)}
+          type="button"
+        >
+          <ArrowLeft aria-hidden="true" size={15} />
+          Back to Inventory
+        </button>
+      ) : null}
 
       <div className="flex flex-wrap gap-2">
         <button className="btn-primary inline-flex items-center gap-1.5" disabled={saving} onClick={save} type="button">

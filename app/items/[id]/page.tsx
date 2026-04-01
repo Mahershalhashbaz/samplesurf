@@ -8,14 +8,31 @@ import { formatCents } from "@/lib/money";
 
 type PageProps = {
   params: { id: string };
+  searchParams: Record<string, string | string[] | undefined>;
 };
 
-export default async function ItemDetailsPage({ params }: PageProps) {
+function firstString(value: string | string[] | undefined): string | undefined {
+  return Array.isArray(value) ? value[0] : value;
+}
+
+export default async function ItemDetailsPage({ params, searchParams }: PageProps) {
   const item = await db.item.findUnique({ where: { id: params.id } });
 
   if (!item) {
     notFound();
   }
+
+  const inventoryParams = new URLSearchParams();
+  for (const [key, value] of Object.entries(searchParams)) {
+    const first = firstString(value);
+    if (!first) {
+      continue;
+    }
+    inventoryParams.set(key, first);
+  }
+  const inventoryReturnHref = inventoryParams.toString()
+    ? `/items?${inventoryParams.toString()}`
+    : "/items";
 
   return (
     <div className="space-y-6">
@@ -45,6 +62,7 @@ export default async function ItemDetailsPage({ params }: PageProps) {
       </section>
 
       <ItemDetailsEditor
+        inventoryReturnHref={inventoryReturnHref}
         item={{
           id: item.id,
           asin: item.asin,

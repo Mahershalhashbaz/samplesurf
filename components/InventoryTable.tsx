@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import { InlineSoldEditor } from "@/components/InlineSoldEditor";
 import { StatusChip } from "@/components/StatusChip";
@@ -30,6 +30,12 @@ type InventoryTableProps = {
 
 export function InventoryTable({ rows }: InventoryTableProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  function itemHref(itemId: string): string {
+    const serialized = searchParams.toString();
+    return serialized ? `/items/${itemId}?${serialized}` : `/items/${itemId}`;
+  }
 
   return (
     <div>
@@ -44,11 +50,11 @@ export function InventoryTable({ rows }: InventoryTableProps) {
           <article
             className="cursor-pointer rounded-xl border border-[color:var(--border)] bg-[color:var(--card)] p-4 transition hover:border-[color:var(--brand-primary)]/35 hover:shadow-soft"
             key={`card-${row.id}`}
-            onClick={() => router.push(`/items/${row.id}`)}
+            onClick={() => router.push(itemHref(row.id))}
             onKeyDown={(event) => {
               if (event.key === "Enter" || event.key === " ") {
                 event.preventDefault();
-                router.push(`/items/${row.id}`);
+                router.push(itemHref(row.id));
               }
             }}
             role="link"
@@ -121,11 +127,11 @@ export function InventoryTable({ rows }: InventoryTableProps) {
               className="cursor-pointer hover:bg-ice/45"
               data-testid={`inventory-row-${row.asin}`}
               key={row.id}
-              onClick={() => router.push(`/items/${row.id}`)}
+              onClick={() => router.push(itemHref(row.id))}
               onKeyDown={(event) => {
                 if (event.key === "Enter" || event.key === " ") {
                   event.preventDefault();
-                  router.push(`/items/${row.id}`);
+                  router.push(itemHref(row.id));
                 }
               }}
               tabIndex={0}
