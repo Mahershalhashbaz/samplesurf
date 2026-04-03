@@ -274,105 +274,108 @@ export function InventoryTable({ rows }: InventoryTableProps) {
         ))}
       </div>
 
-      <table className="hidden w-full table-fixed md:table" data-testid="inventory-table">
-        <thead className="bg-ice text-xs uppercase tracking-wide text-ink/70">
-          <tr>
-            <th className="w-[7rem] px-3 py-3">Received</th>
-            <th className="w-[7rem] px-3 py-3">ASIN</th>
-            <th className="px-3 py-3">Title</th>
-            <th className="hidden w-[6.5rem] px-3 py-3 xl:table-cell">Type</th>
-            <th className="hidden w-[7rem] px-3 py-3 lg:table-cell">Disposition</th>
-            <th className="w-[7.5rem] px-3 py-3">Receipt Value</th>
-            <th className="hidden w-[7.5rem] px-3 py-3 xl:table-cell">Disposed Date</th>
-            <th className="hidden w-[7rem] px-3 py-3 lg:table-cell">Proceeds</th>
-            <th className="w-[7rem] px-3 py-3">Gain/Loss</th>
-            <th className="w-[8rem] px-3 py-3">Status</th>
-            <th className="w-[7.5rem] px-3 py-3">View/Edit</th>
-            <th className="w-[12.5rem] px-3 py-3">Inline Edit</th>
-          </tr>
-        </thead>
-        <tbody>
-          {localRows.map((row) => (
-            <tr
-              className="cursor-pointer hover:bg-ice/45"
-              data-testid={`inventory-row-${row.asin}`}
-              key={row.id}
-              onClick={() => openQuickView(row)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter" || event.key === " ") {
-                  event.preventDefault();
-                  openQuickView(row);
-                }
-              }}
-              tabIndex={0}
-            >
-              <td className="px-3 py-3 align-top text-sm">{row.receivedDate}</td>
-              <td className="px-3 py-3 align-top font-mono text-xs">
-                {isAmazonDetailAsin(row.asin) ? (
-                  <Link
-                    className="block truncate text-[color:var(--brand-violet)] underline"
-                    href={buildAmazonDetailUrl(row.asin)}
+      <div className="relative hidden md:block">
+        <div className="pointer-events-none absolute inset-y-0 right-0 z-[1] w-10 bg-gradient-to-l from-[color:var(--card)] via-[color:var(--card)]/82 to-transparent xl:hidden" />
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[58rem] table-fixed" data-testid="inventory-table">
+            <thead className="bg-ice text-xs uppercase tracking-wide text-ink/70">
+              <tr>
+                <th className="w-[7rem] px-3 py-3">Received</th>
+                <th className="w-[7.5rem] px-3 py-3">ASIN</th>
+                <th className="px-3 py-3">Title</th>
+                <th className="w-[8rem] px-3 py-3">Receipt Value</th>
+                <th className="hidden w-[7rem] px-3 py-3 xl:table-cell">Gain/Loss</th>
+                <th className="w-[8.5rem] px-3 py-3">Status</th>
+                <th className="w-[7.75rem] px-3 py-3">View/Edit</th>
+                <th className="hidden w-[12.5rem] px-3 py-3 2xl:table-cell">Inline Edit</th>
+              </tr>
+            </thead>
+            <tbody>
+              {localRows.map((row) => (
+                <tr
+                  className="cursor-pointer hover:bg-ice/45"
+                  data-testid={`inventory-row-${row.asin}`}
+                  key={row.id}
+                  onClick={() => openQuickView(row)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      openQuickView(row);
+                    }
+                  }}
+                  tabIndex={0}
+                >
+                  <td className="px-3 py-3 align-top text-sm">{row.receivedDate}</td>
+                  <td className="px-3 py-3 align-top font-mono text-xs">
+                    {isAmazonDetailAsin(row.asin) ? (
+                      <Link
+                        className="block truncate text-[color:var(--brand-violet)] underline"
+                        href={buildAmazonDetailUrl(row.asin)}
+                        onClick={(event) => event.stopPropagation()}
+                        onKeyDown={(event) => event.stopPropagation()}
+                        rel="noreferrer"
+                        target="_blank"
+                      >
+                        {row.asin}
+                      </Link>
+                    ) : (
+                      <span className="block truncate">{row.asin}</span>
+                    )}
+                  </td>
+                  <td className="px-3 py-3 align-top">
+                    <div className="space-y-1">
+                      <div className="truncate text-sm font-medium text-ink">{row.title || "(missing title)"}</div>
+                      <div className="flex flex-wrap items-center gap-2 text-xs text-slate1 xl:hidden">
+                        <span>{row.dispositionType}</span>
+                        {row.soldDate ? <span>Disposed {row.soldDate}</span> : null}
+                        {row.saleProceedsCents !== null ? <span>Proceeds {formatCents(row.saleProceedsCents)}</span> : null}
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-3 py-3 align-top text-sm">{formatCents(row.receiptValueCents)}</td>
+                  <td className="hidden px-3 py-3 align-top text-sm xl:table-cell">{formatCents(row.gainLossCents)}</td>
+                  <td className="px-3 py-3 align-top">
+                    <div className="space-y-1">
+                      <StatusChip label={row.statusLabel} tone={row.statusTone} />
+                      <p className="text-xs text-slate1">{row.dispositionType}</p>
+                      {row.statusHint ? <p className="text-xs text-amber-700">{row.statusHint}</p> : null}
+                    </div>
+                  </td>
+                  <td
+                    className="px-3 py-3 align-top"
                     onClick={(event) => event.stopPropagation()}
                     onKeyDown={(event) => event.stopPropagation()}
-                    rel="noreferrer"
-                    target="_blank"
                   >
-                    {row.asin}
-                  </Link>
-                ) : (
-                  row.asin
-                )}
-              </td>
-              <td className="px-3 py-3 align-top">
-                <div className="truncate text-sm font-medium text-ink">{row.title || "(missing title)"}</div>
-              </td>
-              <td className="hidden px-3 py-3 align-top text-sm xl:table-cell">{row.acquisitionType}</td>
-              <td className="hidden px-3 py-3 align-top text-sm lg:table-cell">{row.dispositionType}</td>
-              <td className="px-3 py-3 align-top text-sm">{formatCents(row.receiptValueCents)}</td>
-              <td className="hidden px-3 py-3 align-top text-sm xl:table-cell">{row.soldDate || "-"}</td>
-              <td className="hidden px-3 py-3 align-top text-sm lg:table-cell">
-                {formatCents(row.saleProceedsCents)}
-              </td>
-              <td className="px-3 py-3 align-top text-sm">{formatCents(row.gainLossCents)}</td>
-              <td className="px-3 py-3 align-top">
-                <div className="space-y-1">
-                  <StatusChip label={row.statusLabel} tone={row.statusTone} />
-                  {row.statusHint ? <p className="text-xs text-amber-700">{row.statusHint}</p> : null}
-                </div>
-              </td>
-              <td
-                className="px-3 py-3 align-top"
-                onClick={(event) => event.stopPropagation()}
-                onKeyDown={(event) => event.stopPropagation()}
-              >
-                <Link className="btn-secondary inline-flex w-full items-center justify-center gap-1.5 px-3 py-1.5" href={itemHref(row.id)}>
-                  <Eye aria-hidden="true" size={14} />
-                  View / Edit
-                </Link>
-              </td>
-              <td
-                className="px-3 py-3 align-top"
-                onClick={(event) => event.stopPropagation()}
-                onKeyDown={(event) => event.stopPropagation()}
-              >
-                <InlineSoldEditor
-                  dispositionType={row.dispositionType}
-                  itemId={row.id}
-                  saleProceedsCents={row.saleProceedsCents}
-                  soldDate={row.soldDate || null}
-                />
-              </td>
-            </tr>
-          ))}
-          {localRows.length === 0 ? (
-            <tr>
-              <td className="text-sm text-slate1" colSpan={12}>
-                No items match your filters.
-              </td>
-            </tr>
-          ) : null}
-        </tbody>
-      </table>
+                    <Link className="btn-secondary inline-flex w-full items-center justify-center gap-1.5 px-3 py-1.5" href={itemHref(row.id)}>
+                      <Eye aria-hidden="true" size={14} />
+                      View / Edit
+                    </Link>
+                  </td>
+                  <td
+                    className="hidden px-3 py-3 align-top 2xl:table-cell"
+                    onClick={(event) => event.stopPropagation()}
+                    onKeyDown={(event) => event.stopPropagation()}
+                  >
+                    <InlineSoldEditor
+                      dispositionType={row.dispositionType}
+                      itemId={row.id}
+                      saleProceedsCents={row.saleProceedsCents}
+                      soldDate={row.soldDate || null}
+                    />
+                  </td>
+                </tr>
+              ))}
+              {localRows.length === 0 ? (
+                <tr>
+                  <td className="text-sm text-slate1" colSpan={8}>
+                    No items match your filters.
+                  </td>
+                </tr>
+              ) : null}
+            </tbody>
+          </table>
+        </div>
+      </div>
 
       {selectedRow ? (
         <div className="fixed inset-0 z-[10010] flex items-center justify-center p-3 sm:p-6">

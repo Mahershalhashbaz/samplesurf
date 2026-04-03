@@ -24,7 +24,9 @@ export function KpiCard({ label, value, hint, testId, icon: Icon, className, hre
     </>
   );
 
-  const classes = `app-card ${href ? "block transition hover:border-[color:var(--brand-primary)]/35 hover:shadow-soft" : ""} ${className ?? ""}`.trim();
+  const classes = `app-card ${
+    href ? "ui-action-hover block transition hover:border-[color:var(--brand-primary)]/35 hover:shadow-soft" : ""
+  } ${className ?? ""}`.trim();
 
   if (href) {
     return (

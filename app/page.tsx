@@ -104,27 +104,27 @@ export default async function DashboardPage({ searchParams }: PageProps) {
       <section className="app-card ui-fade-up" style={{ animationDelay: "120ms" }}>
         <h3 className="mb-3 text-sm font-semibold uppercase tracking-[0.16em] text-slate1">Quick Actions</h3>
         <div className="grid grid-cols-1 gap-2 sm:flex sm:flex-wrap">
-          <Link className="btn-primary inline-flex w-full items-center justify-center gap-1.5 sm:w-auto" href={`/items/new?year=${year}`}>
+          <Link className="ui-action-hover btn-primary inline-flex w-full items-center justify-center gap-1.5 sm:w-auto" href={`/items/new?year=${year}`}>
             <PlusCircle aria-hidden="true" size={15} />
             Add Item
           </Link>
-          <Link className="btn-secondary inline-flex w-full items-center justify-center gap-1.5 sm:w-auto" href={`/items?year=${year}`}>
+          <Link className="ui-action-hover btn-secondary inline-flex w-full items-center justify-center gap-1.5 sm:w-auto" href={`/items?year=${year}`}>
             <Package aria-hidden="true" size={15} />
             Inventory
           </Link>
-          <Link className="btn-secondary inline-flex w-full items-center justify-center gap-1.5 sm:w-auto" href={`/video-tracker?year=${year}`}>
+          <Link className="ui-action-hover btn-secondary inline-flex w-full items-center justify-center gap-1.5 sm:w-auto" href={`/video-tracker?year=${year}`}>
             <Clapperboard aria-hidden="true" size={15} />
             Video Tracker
           </Link>
-          <Link className="btn-secondary inline-flex w-full items-center justify-center gap-1.5 sm:w-auto" href={`/import?year=${year}`}>
+          <Link className="ui-action-hover btn-secondary inline-flex w-full items-center justify-center gap-1.5 sm:w-auto" href={`/import?year=${year}`}>
             <FileUp aria-hidden="true" size={15} />
             Import CSV
           </Link>
-          <Link className="btn-secondary inline-flex w-full items-center justify-center gap-1.5 sm:w-auto" href={`/tax-year?year=${year}`}>
+          <Link className="ui-action-hover btn-secondary inline-flex w-full items-center justify-center gap-1.5 sm:w-auto" href={`/tax-year?year=${year}`}>
             <Wallet aria-hidden="true" size={15} />
             Go to Tax Year View
           </Link>
-          <a className="btn-secondary inline-flex w-full items-center justify-center gap-1.5 sm:w-auto" href="/api/export/backup">
+          <a className="ui-action-hover btn-secondary inline-flex w-full items-center justify-center gap-1.5 sm:w-auto" href="/api/export/backup">
             <Download aria-hidden="true" size={15} />
             Export Backup
           </a>

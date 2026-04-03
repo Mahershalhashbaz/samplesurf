@@ -1,6 +1,5 @@
 import { AlarmClock, CalendarClock, CheckCircle2, ListTodo, Timer } from "lucide-react";
 
-import { KpiCard } from "@/components/KpiCard";
 import { VideoTrackerBoard, type VideoTrackerRow } from "@/components/VideoTrackerBoard";
 import { toDateInputValue } from "@/lib/dates";
 import { getVideoTrackerData } from "@/lib/queries";
@@ -45,8 +44,8 @@ export default async function VideoTrackerPage() {
   }));
 
   return (
-    <div className="space-y-4 md:space-y-6">
-      <section className="app-card">
+    <div className="space-y-3 md:space-y-5">
+      <section className="app-card ui-fade-up" style={{ animationDelay: "30ms" }}>
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
             <h2 className="text-xl font-semibold text-ink md:text-2xl">Video Tracker</h2>
@@ -58,15 +57,47 @@ export default async function VideoTrackerPage() {
         </div>
       </section>
 
-      <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
-        <KpiCard icon={ListTodo} label="Open Videos" value={String(openVideos)} />
-        <KpiCard icon={AlarmClock} label="Overdue" value={String(overdueCount)} />
-        <KpiCard icon={CalendarClock} label="Due Soon" value={String(dueSoonCount)} />
-        <KpiCard icon={Timer} label="Oldest Open" value={oldestOpenDays === null ? "-" : `${oldestOpenDays}d`} />
-        <KpiCard icon={CheckCircle2} label="Completed This Week" value={String(completedThisWeek)} />
+      <section className="app-card ui-fade-up p-4 md:p-5" style={{ animationDelay: "70ms" }}>
+        <div className="grid grid-cols-2 gap-2 md:grid-cols-3 xl:grid-cols-5">
+          <CompactMetric icon={ListTodo} label="Open Videos" value={String(openVideos)} />
+          <CompactMetric icon={AlarmClock} label="Overdue" value={String(overdueCount)} />
+          <CompactMetric icon={CalendarClock} label="Due Soon" value={String(dueSoonCount)} />
+          <CompactMetric
+            icon={Timer}
+            label="Oldest Open"
+            value={oldestOpenDays === null ? "-" : `${oldestOpenDays}d`}
+          />
+          <CompactMetric
+            icon={CheckCircle2}
+            label="Completed This Week"
+            value={String(completedThisWeek)}
+          />
+        </div>
       </section>
 
-      <VideoTrackerBoard rows={rows} />
+      <div className="ui-fade-up" style={{ animationDelay: "110ms" }}>
+        <VideoTrackerBoard rows={rows} />
+      </div>
+    </div>
+  );
+}
+
+function CompactMetric({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: typeof ListTodo;
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="rounded-xl border border-[color:var(--border)] bg-ice/40 p-3">
+      <p className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate1">
+        <Icon aria-hidden="true" size={13} />
+        {label}
+      </p>
+      <p className="mt-1.5 text-lg font-semibold text-ink md:text-xl">{value}</p>
     </div>
   );
 }

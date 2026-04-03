@@ -3,6 +3,8 @@
 import type { LucideIcon } from "lucide-react";
 import {
   AlertTriangle,
+  ArrowLeft,
+  ArrowUp,
   Box,
   Clapperboard,
   DatabaseBackup,
@@ -64,8 +66,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [storedYear, setStoredYear] = useState<number | null>(null);
   const [isDarkTheme, setIsDarkTheme] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [showPageUtility, setShowPageUtility] = useState(false);
   const searchString = searchParams.toString();
   const showGlobalQuickAdd = pathname !== "/items/new" && !mobileNavOpen;
+  const isItemDetailPage = pathname.startsWith("/items/") && pathname !== "/items" && pathname !== "/items/new";
+  const showFloatingPageUtility = pathname !== "/" && !mobileNavOpen && showPageUtility;
 
   const rawYear = searchParams.get("year");
   const urlYear = parseYear(rawYear);
@@ -161,6 +166,20 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     setMobileNavOpen(false);
   }, [pathname, searchString]);
 
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    function onScroll() {
+      setShowPageUtility(window.scrollY > 240);
+    }
+
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [pathname]);
+
   function applyYear(parsed: number) {
     window.localStorage.setItem(TAX_YEAR_STORAGE_KEY, String(parsed));
     setStoredYear(parsed);
@@ -183,6 +202,19 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     setIsDarkTheme(nextDark);
     document.documentElement.classList.toggle("dark", nextDark);
     window.localStorage.setItem(THEME_STORAGE_KEY, nextDark ? "dark" : "light");
+  }
+
+  function onFloatingUtilityClick() {
+    if (isItemDetailPage) {
+      if (window.history.length > 1) {
+        router.back();
+      } else {
+        router.push(hrefWithYear("/items", activeYear));
+      }
+      return;
+    }
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   return (
@@ -337,7 +369,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 return (
                   <li key={`mobile-${item.href}`}>
                     <Link
-                      className={`group relative inline-flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium transition ${
+                      className={`ui-action-hover group relative inline-flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium transition ${
                         active ? "sidebar-link-active" : "sidebar-link"
                       }`}
                       href={hrefWithYear(item.href, activeYear)}
@@ -378,7 +410,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 return (
                   <li key={item.href}>
                     <Link
-                      className={`group relative inline-flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium transition ${
+                      className={`ui-action-hover group relative inline-flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium transition ${
                         active ? "sidebar-link-active" : "sidebar-link"
                       }`}
                       href={hrefWithYear(item.href, activeYear)}
@@ -396,7 +428,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </nav>
         </aside>
 
-        <main className="space-y-5 md:space-y-6">{children}</main>
+        <main
+          className={`space-y-5 md:space-y-6 ${pathname !== "/" ? "ui-page-enter" : ""}`}
+          key={pathname}
+        >
+          {children}
+        </main>
       </div>
 
       {showGlobalQuickAdd ? (
@@ -407,6 +444,18 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         >
           <PlusCircle aria-hidden="true" size={22} />
         </Link>
+      ) : null}
+
+      {showFloatingPageUtility ? (
+        <button
+          aria-label={isItemDetailPage ? "Go back" : "Scroll to top"}
+          className="floating-page-utility btn-secondary fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] left-4 z-[69] inline-flex min-h-12 items-center justify-center gap-2 rounded-full px-4 py-0 shadow-xl md:left-6"
+          onClick={onFloatingUtilityClick}
+          type="button"
+        >
+          {isItemDetailPage ? <ArrowLeft aria-hidden="true" size={16} /> : <ArrowUp aria-hidden="true" size={16} />}
+          <span className="text-sm">{isItemDetailPage ? "Back" : "Top"}</span>
+        </button>
       ) : null}
     </div>
   );

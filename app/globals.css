@@ -378,6 +378,24 @@ td {
   animation: ui-fade-up 320ms ease-out both;
 }
 
+.ui-page-enter {
+  animation: ui-fade-up 260ms ease-out both;
+}
+
+.ui-action-hover {
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    border-color 160ms ease,
+    background-color 160ms ease;
+}
+
+@media (hover: hover) {
+  .ui-action-hover:hover {
+    transform: translateY(-1px) scale(1.01);
+  }
+}
+
 .ui-delay-1 {
   animation-delay: 40ms;
 }
@@ -417,6 +435,17 @@ td {
   transform: scale(0.94);
 }
 
+.floating-page-utility {
+  backdrop-filter: blur(10px);
+  background: color-mix(in srgb, var(--card) 88%, transparent);
+  border-color: color-mix(in srgb, var(--brand-primary) 18%, var(--border));
+}
+
+.floating-page-utility:hover {
+  background: color-mix(in srgb, var(--brand-primary) 8%, var(--card));
+  border-color: color-mix(in srgb, var(--brand-primary) 30%, var(--border));
+}
+
 .success-overlay-card {
   animation: ui-scale-in 280ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
@@ -436,13 +465,15 @@ td {
   .ui-fade-up,
   .notice-anim,
   .video-row-motion,
+  .ui-page-enter,
   .success-overlay-card,
   .success-check-wrap {
     animation: none !important;
   }
 
   .fab-float-btn:active,
-  .video-row-motion:hover {
+  .video-row-motion:hover,
+  .ui-action-hover:hover {
     transform: none;
   }
 }
