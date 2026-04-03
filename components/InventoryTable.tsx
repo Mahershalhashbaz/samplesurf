@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { CalendarDays, DollarSign, Eye, Gift, Loader2, ShoppingBag, X } from "lucide-react";
 import { startTransition, useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 
 import { DatePicker } from "@/components/DatePicker";
 import { InlineSoldEditor } from "@/components/InlineSoldEditor";
@@ -76,10 +77,15 @@ export function InventoryTable({ rows }: InventoryTableProps) {
   const [savingQuickAction, setSavingQuickAction] = useState(false);
   const [quickMessage, setQuickMessage] = useState<string | null>(null);
   const [quickError, setQuickError] = useState<string | null>(null);
+  const [portalReady, setPortalReady] = useState(false);
 
   useEffect(() => {
     setLocalRows(rows);
   }, [rows]);
+
+  useEffect(() => {
+    setPortalReady(true);
+  }, []);
 
   const selectedRow = useMemo(
     () => localRows.find((row) => row.id === selectedRowId) ?? null,
@@ -377,8 +383,9 @@ export function InventoryTable({ rows }: InventoryTableProps) {
         </div>
       </div>
 
-      {selectedRow ? (
-        <div className="fixed inset-0 z-[10010] flex items-center justify-center p-3 sm:p-6">
+      {selectedRow && portalReady
+        ? createPortal(
+            <div className="fixed inset-0 z-[10010] flex items-center justify-center p-3 sm:p-6">
           <button
             aria-label="Close quick view"
             className="absolute inset-0 bg-slate-950/50 backdrop-blur-sm"
@@ -546,8 +553,10 @@ export function InventoryTable({ rows }: InventoryTableProps) {
               </button>
             </div>
           </div>
-        </div>
-      ) : null}
+        </div>,
+            document.body,
+          )
+        : null}
     </div>
   );
 }

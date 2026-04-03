@@ -51,21 +51,21 @@ export default async function DashboardPage({ searchParams }: PageProps) {
         />
         <KpiCard
           className="ui-fade-up ui-delay-2"
-          label={`Sample Income (${year})`}
-          value={<CountUpValue kind="currencyCents" value={metrics.sampleIncomeCents} />}
-        />
-        <KpiCard
-          className="ui-fade-up ui-delay-3"
-          label={`Disposition Gain/Loss (${year})`}
-          value={<CountUpValue kind="currencyCents" value={metrics.dispositionGainLossCents} />}
-        />
-        <KpiCard
-          className="ui-fade-up ui-delay-4"
           href={`/video-tracker?year=${year}`}
           icon={Clapperboard}
           label="Video Tracker"
           value={<CountUpValue kind="number" value={metrics.openVideoCount} />}
           hint="Open items still waiting for a video"
+        />
+        <KpiCard
+          className="ui-fade-up ui-delay-3"
+          label={`Sample Income (${year})`}
+          value={<CountUpValue kind="currencyCents" value={metrics.sampleIncomeCents} />}
+        />
+        <KpiCard
+          className="ui-fade-up ui-delay-4"
+          label={`Disposition Gain/Loss (${year})`}
+          value={<CountUpValue kind="currencyCents" value={metrics.dispositionGainLossCents} />}
         />
       </section>
 

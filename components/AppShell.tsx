@@ -66,11 +66,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [storedYear, setStoredYear] = useState<number | null>(null);
   const [isDarkTheme, setIsDarkTheme] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
-  const [showPageUtility, setShowPageUtility] = useState(false);
+  const [showScrollTopButton, setShowScrollTopButton] = useState(false);
+  const [showBackButton, setShowBackButton] = useState(false);
   const searchString = searchParams.toString();
   const showGlobalQuickAdd = pathname !== "/items/new" && !mobileNavOpen;
   const isItemDetailPage = pathname.startsWith("/items/") && pathname !== "/items" && pathname !== "/items/new";
-  const showFloatingPageUtility = pathname !== "/" && !mobileNavOpen && showPageUtility;
+  const showFloatingScrollTop = pathname !== "/" && !mobileNavOpen && showScrollTopButton;
+  const showFloatingBack = pathname !== "/" && !mobileNavOpen && showBackButton;
 
   const rawYear = searchParams.get("year");
   const urlYear = parseYear(rawYear);
@@ -172,7 +174,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     }
 
     function onScroll() {
-      setShowPageUtility(window.scrollY > 240);
+      const nextTop = window.scrollY > 240;
+      const nextBack = window.scrollY > Math.max(420, Math.round(window.innerHeight * 0.75));
+      setShowScrollTopButton(nextTop);
+      setShowBackButton(nextBack);
     }
 
     onScroll();
@@ -204,17 +209,22 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     window.localStorage.setItem(THEME_STORAGE_KEY, nextDark ? "dark" : "light");
   }
 
-  function onFloatingUtilityClick() {
-    if (isItemDetailPage) {
-      if (window.history.length > 1) {
-        router.back();
-      } else {
-        router.push(hrefWithYear("/items", activeYear));
-      }
+  function onScrollTopClick() {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function onBackClick() {
+    if (window.history.length > 1) {
+      router.back();
       return;
     }
 
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    if (isItemDetailPage) {
+      router.push(hrefWithYear("/items", activeYear));
+      return;
+    }
+
+    router.push(hrefWithYear("/", activeYear));
   }
 
   return (
@@ -446,15 +456,26 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </Link>
       ) : null}
 
-      {showFloatingPageUtility ? (
+      {showFloatingBack ? (
         <button
-          aria-label={isItemDetailPage ? "Go back" : "Scroll to top"}
-          className="floating-page-utility btn-secondary fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] left-4 z-[69] inline-flex min-h-12 items-center justify-center gap-2 rounded-full px-4 py-0 shadow-xl md:left-6"
-          onClick={onFloatingUtilityClick}
+          aria-label="Go back"
+          className="floating-back-utility btn-secondary fixed left-4 top-[calc(env(safe-area-inset-top)+0.85rem)] z-[69] inline-flex h-11 w-11 items-center justify-center rounded-full p-0 shadow-lg md:left-6 md:top-6"
+          onClick={onBackClick}
           type="button"
         >
-          {isItemDetailPage ? <ArrowLeft aria-hidden="true" size={16} /> : <ArrowUp aria-hidden="true" size={16} />}
-          <span className="text-sm">{isItemDetailPage ? "Back" : "Top"}</span>
+          <ArrowLeft aria-hidden="true" size={16} />
+        </button>
+      ) : null}
+
+      {showFloatingScrollTop ? (
+        <button
+          aria-label="Scroll to top"
+          className="floating-page-utility btn-secondary fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] left-4 z-[69] inline-flex min-h-12 items-center justify-center gap-2 rounded-full px-4 py-0 shadow-xl md:left-6"
+          onClick={onScrollTopClick}
+          type="button"
+        >
+          <ArrowUp aria-hidden="true" size={16} />
+          <span className="text-sm">Top</span>
         </button>
       ) : null}
     </div>
